@@ -28,12 +28,18 @@ async function addPurchasesWithRealMerchants() {
   // Add purchases to checking account
   console.log('Adding purchases to checking account...');
   for (let i = 0; i < 5; i++) {
+    const purchaseDate = new Date();
+    const daysToSubtract = Math.floor(Math.random() * 30);
+    purchaseDate.setDate(purchaseDate.getDate() - daysToSubtract);
+    const formattedDate = purchaseDate.toISOString().slice(0, 10);
+
     const merchant = merchants[i];
     const purchaseData = {
       merchant_id: merchant.id,
       medium: "balance",
       amount: Math.floor(Math.random() * 200) + 10, // Random amount between $10-$210
-      description: `Purchase at ${merchant.name} - ${merchant.category}`
+      description: `Purchase at ${merchant.name} - ${merchant.category}`,
+      purchase_date: formattedDate // Use the newly formatted date string
     };
 
     try {
@@ -47,6 +53,7 @@ async function addPurchasesWithRealMerchants() {
       console.log(`✅ Purchase ${i + 1} created: ${purchaseId}`);
       console.log(`   Amount: $${purchaseData.amount}`);
       console.log(`   Merchant: ${merchant.name} (${merchant.category})`);
+      console.log(`   Date: ${purchaseData.purchase_date}`);
       
     } catch (error) {
       console.error(`❌ Error creating purchase ${i + 1}:`, error.message);
@@ -59,12 +66,18 @@ async function addPurchasesWithRealMerchants() {
   console.log('\nAdding purchases to savings account...');
   // Add purchases to savings account
   for (let i = 5; i < 8; i++) {
+    const purchaseDate = new Date();
+    const daysToSubtract = Math.floor(Math.random() * 30);
+    purchaseDate.setDate(purchaseDate.getDate() - daysToSubtract);
+    const formattedDate = purchaseDate.toISOString().slice(0, 10);
+
     const merchant = merchants[i];
     const purchaseData = {
       merchant_id: merchant.id,
       medium: "balance",
       amount: Math.floor(Math.random() * 200) + 10, // Random amount between $10-$210
-      description: `Purchase at ${merchant.name} - ${merchant.category}`
+      description: `Purchase at ${merchant.name} - ${merchant.category}`,
+      purchase_date: formattedDate // Use the newly formatted date string
     };
 
     try {
@@ -78,6 +91,7 @@ async function addPurchasesWithRealMerchants() {
       console.log(`✅ Purchase ${i - 4} created: ${purchaseId}`);
       console.log(`   Amount: $${purchaseData.amount}`);
       console.log(`   Merchant: ${merchant.name} (${merchant.category})`);
+      console.log(`   Date: ${purchaseData.purchase_date}`);
       
     } catch (error) {
       console.error(`❌ Error creating purchase ${i - 4}:`, error.message);
@@ -86,16 +100,6 @@ async function addPurchasesWithRealMerchants() {
       }
     }
   }
-
-  console.log('\n✅ All purchases with real merchants added successfully!');
-  console.log('\n📊 FINAL DATA SUMMARY:');
-  console.log('=' .repeat(50));
-  console.log(`👤 Customer: 68d8200d9683f20dd5196758`);
-  console.log(`💳 Checking Account: ${checkingAccountId}`);
-  console.log(`💰 Savings Account: ${savingsAccountId}`);
-  console.log(`🛒 Total Purchases: 8 (5 checking + 3 savings)`);
-  console.log(`💵 Total Deposits: 5`);
-  console.log(`🏪 Merchants Used: Walmart, Starbucks, Netflix, Kroger, DoorDash, AMC, Jersey Mike's, Lyft`);
 }
 
 // Run the script

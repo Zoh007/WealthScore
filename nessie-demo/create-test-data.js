@@ -116,14 +116,15 @@ class NessieDataCreator {
   }
 
   // Create deposits for an account
-  async createDeposits(accountId, count = 3) {
+  async createDeposits(accountId, count = 8) {
     const deposits = [];
-    
+    let currentDate = new Date();
     for (let i = 0; i < count; i++) {
       const depositData = {
         medium: "balance",
+        transaction_date: currentDate.setDate(currentDate.getDate() - 14),
         amount: Math.floor(Math.random() * 2000) + 500, // Random amount between $500-$2500
-        description: `Deposit ${i + 1} - Salary/Income`
+        description: `Bi-Weekly Salary`
       };
 
       try {
@@ -153,14 +154,16 @@ class NessieDataCreator {
   }
 
   // Create purchases for an account
-  async createPurchases(accountId, count = 5) {
+  async createPurchases(accountId, count = 23) {
     const purchases = [];
     
     for (let i = 0; i < count; i++) {
+      let currentDate = new Date();
       const purchaseData = {
         medium: "balance",
         amount: Math.floor(Math.random() * 200) + 10, // Random amount between $10-$210
-        description: `Purchase ${i + 1} - Transaction`
+        description: `Purchase ${i + 1} - Transaction`,
+        purchase_date: currentDate.setDate(currentDate.getDate() - Math.floor(Math.random() * 3))
       };
 
       try {
