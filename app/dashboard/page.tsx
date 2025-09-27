@@ -126,7 +126,6 @@ export default function Dashboard() {
       </header>
       
       <main className="flex items-center justify-around w-full">
-      <div className="flex items-center justify-around w-full">
         <Card className="w-1/5">
           <CardTitle>Cash Flow</CardTitle>
           <CardContent className="text-gray-600">Total Account Balance:</CardContent>
