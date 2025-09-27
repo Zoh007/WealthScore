@@ -12,7 +12,12 @@ interface Transaction {
   amount: number;
   description?: string;
   date?: string;
-  type: 'deposit' | 'purchase' | 'bill';
+  type: 'deposit' | 'purchase' | 'bill' | 'merchant';
+  status?: string;
+  medium?: string;
+  merchant_id?: string;
+  payer_id?: string;
+  payee_id?: string;
 }
 
 interface FinancialData {
