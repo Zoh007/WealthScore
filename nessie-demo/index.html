@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WealthScore - Real-Time Financial Monitoring</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .status-bar {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.polling {
+            background: #2196F3;
+        }
+
+        .status-dot.stopped {
+            background: #f44336;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .metric-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .wealth-score {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            border: 4px solid rgba(255,255,255,0.3);
+        }
+
+        .score-interpretation {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .transactions {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .transaction-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .transaction-amount.positive {
+            color: #4CAF50;
+        }
+
+        .transaction-amount.negative {
+            color: #f44336;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 WealthScore</h1>
+            <p>Real-Time Financial Monitoring with Nessie API</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot stopped" id="statusDot"></div>
+                <span id="statusText">Polling Stopped</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-secondary" id="stopBtn" onclick="stopPolling()">
+                🛑 Stop Polling
+            </button>
+            <button class="btn btn-primary" id="startBtn" onclick="startPolling()" style="display: none;">
+                🚀 Start Polling
+            </button>
+        </div>
+
+        <div class="wealth-score" id="wealthScoreCard" style="display: none;">
+            <div class="score-circle" id="scoreCircle">0</div>
+            <h2>Wealth Score</h2>
+            <div class="score-interpretation" id="scoreInterpretation">No data available</div>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <h3><span class="card-icon">💳</span> Accounts</h3>
+                <div id="accountsData">
+                    <div class="metric">
+                        <span class="metric-label">Total Accounts</span>
+                        <span class="metric-value" id="totalAccounts">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Total Balance</span>
+                        <span class="metric-value" id="totalBalance">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><span class="card-icon">💵</span> Deposits</h3>
+                <div id="depositsData">
+                    <div class="metric">
+                        <span class="metric-label">Total Deposits</span>
+                        <span class="metric-value" id="totalDeposits">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Total Amount</span>
+                        <span class="metric-value" id="depositsAmount">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><span class="card-icon">🛒</span> Purchases</h3>
+                <div id="purchasesData">
+                    <div class="metric">
+                        <span class="metric-label">Total Purchases</span>
+                        <span class="metric-value" id="totalPurchases">0</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Total Spent</span>
+                        <span class="metric-value" id="purchasesAmount">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="transactions">
+            <h3><span class="card-icon">📊</span> Recent Transactions</h3>
+            <div id="transactionsList">
+                <p style="text-align: center; color: #666; padding: 20px;">No transactions available</p>
+            </div>
+        </div>
+
+        <div class="last-updated" id="lastUpdated">
+            Last updated: Never
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const BASE_URL = '/api'; // Use local proxy
+        const CUSTOMER_ID = '68d8200d9683f20dd5196758';
+        const CHECKING_ACCOUNT_ID = '68d8200d9683f20dd5196759';
+        const SAVINGS_ACCOUNT_ID = '68d8200d9683f20dd519675a';
+
+        let pollingInterval = null;
+        let isPolling = false;
+
+        // DOM elements
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const wealthScoreCard = document.getElementById('wealthScoreCard');
+        const scoreCircle = document.getElementById('scoreCircle');
+        const scoreInterpretation = document.getElementById('scoreInterpretation');
+
+        // API functions
+        async function fetchAccounts() {
+            try {
+                const response = await fetch(`${BASE_URL}/customers/${CUSTOMER_ID}/accounts`);
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching accounts:', error);
+                return [];
+            }
+        }
+
+        async function fetchDeposits() {
+            try {
+                const response = await fetch(`${BASE_URL}/accounts/${CHECKING_ACCOUNT_ID}/deposits`);
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching deposits:', error);
+                return [];
+            }
+        }
+
+        async function fetchPurchases() {
+            try {
+                const response = await fetch(`${BASE_URL}/accounts/${CHECKING_ACCOUNT_ID}/purchases`);
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching purchases:', error);
+                return [];
+            }
+        }
+
+        // Wealth score calculation
+        function calculateWealthScore(accounts, deposits, purchases) {
+            if (accounts.length === 0) return 0;
+
+            const totalBalance = accounts.reduce((sum, account) => sum + (account.balance || 0), 0);
+            const totalDeposits = deposits.reduce((sum, deposit) => sum + (deposit.amount || 0), 0);
+            const totalSpent = purchases.reduce((sum, purchase) => sum + (purchase.amount || 0), 0);
+
+            const balanceScore = Math.min(totalBalance / 10000, 100) * 0.4;
+            const depositScore = Math.min(deposits.length * 15, 100) * 0.3;
+            const spendingScore = totalSpent > 0 ? Math.min(100 - (totalSpent / totalDeposits * 100), 100) * 0.2 : 50 * 0.2;
+            const diversityScore = accounts.length >= 2 ? 100 * 0.1 : accounts.length * 50 * 0.1;
+
+            return Math.round(balanceScore + depositScore + spendingScore + diversityScore);
+        }
+
+        function getScoreInterpretation(score) {
+            if (score >= 80) return '🌟 Excellent financial health!';
+            if (score >= 60) return '👍 Good financial standing';
+            if (score >= 40) return '⚠️ Room for improvement';
+            return '📉 Needs attention';
+        }
+
+        // UI update functions
+        function updateStatus(status) {
+            statusDot.className = `status-dot ${status}`;
+            statusText.textContent = `Polling ${status === 'polling' ? 'Active' : status === 'stopped' ? 'Stopped' : 'Error'}`;
+        }
+
+        function updateAccounts(accounts) {
+            const totalBalance = accounts.reduce((sum, account) => sum + (account.balance || 0), 0);
+            document.getElementById('totalAccounts').textContent = accounts.length;
+            document.getElementById('totalBalance').textContent = `$${totalBalance.toLocaleString()}`;
+        }
+
+        function updateDeposits(deposits) {
+            const totalAmount = deposits.reduce((sum, deposit) => sum + (deposit.amount || 0), 0);
+            document.getElementById('totalDeposits').textContent = deposits.length;
+            document.getElementById('depositsAmount').textContent = `$${totalAmount.toLocaleString()}`;
+        }
+
+        function updatePurchases(purchases) {
+            const totalAmount = purchases.reduce((sum, purchase) => sum + (purchase.amount || 0), 0);
+            document.getElementById('totalPurchases').textContent = purchases.length;
+            document.getElementById('purchasesAmount').textContent = `$${totalAmount.toLocaleString()}`;
+        }
+
+        function updateWealthScore(score) {
+            wealthScoreCard.style.display = 'block';
+            scoreCircle.textContent = score;
+            scoreInterpretation.textContent = getScoreInterpretation(score);
+        }
+
+        function updateTransactions(deposits, purchases) {
+            const transactionsList = document.getElementById('transactionsList');
+            const allTransactions = [
+                ...deposits.map(d => ({ ...d, type: 'deposit' })),
+                ...purchases.map(p => ({ ...p, type: 'purchase' }))
+            ].sort((a, b) => new Date(b.date || Date.now()) - new Date(a.date || Date.now())).slice(0, 10);
+
+            if (allTransactions.length === 0) {
+                transactionsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No transactions available</p>';
+                return;
+            }
+
+            transactionsList.innerHTML = allTransactions.map(transaction => `
+                <div class="transaction-item">
+                    <div class="transaction-info">
+                        <div style="font-weight: 600;">${transaction.description || 'Transaction'}</div>
+                        <div style="font-size: 0.9rem; color: #666;">
+                            ${transaction.type === 'deposit' ? '💵 Deposit' : '🛒 Purchase'}
+                        </div>
+                    </div>
+                    <div class="transaction-amount ${transaction.type === 'deposit' ? 'positive' : 'negative'}">
+                        ${transaction.type === 'deposit' ? '+' : '-'}$${(transaction.amount || 0).toLocaleString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateLastUpdated() {
+            document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+        }
+
+        // Main polling function
+        async function pollData() {
+            try {
+                updateStatus('polling');
+                
+                const [accounts, deposits, purchases] = await Promise.all([
+                    fetchAccounts(),
+                    fetchDeposits(),
+                    fetchPurchases()
+                ]);
+
+                updateAccounts(accounts);
+                updateDeposits(deposits);
+                updatePurchases(purchases);
+                updateTransactions(deposits, purchases);
+
+                const wealthScore = calculateWealthScore(accounts, deposits, purchases);
+                updateWealthScore(wealthScore);
+                updateLastUpdated();
+
+            } catch (error) {
+                console.error('Polling error:', error);
+                updateStatus('error');
+            }
+        }
+
+        // Control functions
+        function startPolling() {
+            if (isPolling) return;
+            
+            isPolling = true;
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-block';
+            
+            // Initial poll
+            pollData();
+            
+            // Set up interval
+            pollingInterval = setInterval(pollData, 5000); // Poll every 5 seconds
+        }
+
+        function stopPolling() {
+            if (!isPolling) return;
+            
+            isPolling = false;
+            startBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+            
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+            
+            updateStatus('stopped');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('stopped');
+            // Start polling automatically when page loads
+            setTimeout(() => {
+                startPolling();
+            }, 1000); // Start after 1 second delay
+        });
+    </script>
+</body>
+</html>
