@@ -11,6 +11,7 @@ import { useFinancialData } from "@/hooks/use-financial-data";
 import { useEffect } from "react";
 import { ScoreBreakdownAccordion } from "@/components/ScoreBreakdownAccordian";
 import { Transaction, TransactionsTable } from "@/components/TransactionsTable";
+import { BankAccountsDisplay } from "@/components/BankAccounts";
 
 let user = "Nathan"
 
@@ -154,80 +155,10 @@ export default function Dashboard() {
       </div>
 
       <div className="p-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Transactions</h1>
         <TransactionsTable transactions={allTransactions } />
       </div>
-      
-      {/* Debug info - remove in production */}
-      <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-        <h3 className="text-sm font-semibold mb-2">Debug Info (Real Data):</h3>
-        <div className="text-xs text-gray-600">
-          <p>Accounts: {data.accounts.length}</p>
-          <p>Deposits: {data.deposits.length}</p>
-          <p>Purchases: {data.purchases.length}</p>
-          <p>Bills: {data.bills.length}</p>
-          <p>Wealth Score: {data.wealthScore}</p>
-          
-          {/* Accounts Data */}
-          <div className="mt-4">
-            <h4 className="font-semibold text-sm mb-2">🏦 Accounts ({data.accounts.length}):</h4>
-            {data.accounts.map((account, index) => (
-              <div key={account._id} className="ml-4 mb-2 p-2 bg-white rounded border">
-                <p><strong>Account {index + 1}:</strong> {account.nickname}</p>
-                <p><strong>Type:</strong> {account.type}</p>
-                <p><strong>Balance:</strong> ${account.balance?.toLocaleString()}</p>
-                <p><strong>ID:</strong> {account._id}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Deposits Data */}
-          <div className="mt-4">
-            <h4 className="font-semibold text-sm mb-2">💰 Deposits ({data.deposits.length}):</h4>
-            {data.deposits.map((deposit, index) => (
-              <div key={deposit._id} className="ml-4 mb-2 p-2 bg-white rounded border">
-                <p><strong>Deposit {index + 1}:</strong> {deposit.description}</p>
-                <p><strong>Amount:</strong> ${deposit.amount?.toLocaleString()}</p>
-                <p><strong>Status:</strong> {deposit.status}</p>
-                <p><strong>Medium:</strong> {deposit.medium}</p>
-                <p><strong>ID:</strong> {deposit._id}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Purchases Data */}
-          <div className="mt-4">
-            <h4 className="font-semibold text-sm mb-2">🛒 Purchases ({data.purchases.length}):</h4>
-            {data.purchases.map((purchase, index) => (
-              <div key={purchase._id} className="ml-4 mb-2 p-2 bg-white rounded border">
-                <p><strong>Date:</strong> {purchase.date}</p>
-                <p><strong>Purchase {index + 1}:</strong> {purchase.description}</p>
-                <p><strong>Amount:</strong> ${purchase.amount?.toLocaleString()}</p>
-                <p><strong>Status:</strong> {purchase.status}</p>
-                <p><strong>Type:</strong> {purchase.type}</p>
-                <p><strong>Merchant ID:</strong> {purchase.merchant_id}</p>
-                <p><strong>ID:</strong> {purchase._id}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Bills Data */}
-          <div className="mt-4">
-            <h4 className="font-semibold text-sm mb-2">📋 Bills ({data.bills.length}):</h4>
-            {data.bills.length === 0 ? (
-              <p className="ml-4 text-gray-500">No bills found</p>
-            ) : (
-              data.bills.map((bill, index) => (
-                <div key={bill._id} className="ml-4 mb-2 p-2 bg-white rounded border">
-                  <p><strong>Bill {index + 1}:</strong> {bill.description}</p>
-                  <p><strong>Amount:</strong> ${bill.amount?.toLocaleString()}</p>
-                  <p><strong>Status:</strong> {bill.status}</p>
-                  <p><strong>ID:</strong> {bill._id}</p>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+      <div className="p-8">
+        <BankAccountsDisplay accounts={data.accounts} />
       </div>
         
       <div className="mt-12 w-full px-6 mx-auto">

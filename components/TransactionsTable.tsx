@@ -13,7 +13,7 @@ export type Transaction = {
   payee_id?: string;
 };
 
-const useSortableData = (items: Transaction[], config = { key: 'date', direction: 'descending' }) => {
+const useSortableData = (items: Transaction[], config = { key: 'date' as keyof Transaction, direction: 'descending' }) => {
   const [sortConfig, setSortConfig] = useState(config);
 
   const sortedItems = useMemo(() => {
@@ -22,6 +22,13 @@ const useSortableData = (items: Transaction[], config = { key: 'date', direction
       sortableItems.sort((a, b) => {
         const aValue = a[sortConfig.key as keyof Transaction];
         const bValue = b[sortConfig.key as keyof Transaction];
+
+        // Handle null/undefined dates to always put them at the end
+        if (sortConfig.key === 'date') {
+            if (!a.date && b.date) return 1;
+            if (a.date && !b.date) return -1;
+            if (!a.date && !b.date) return 0;
+        }
 
         if (aValue === undefined || bValue === undefined) return 0;
 
