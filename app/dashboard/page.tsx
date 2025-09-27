@@ -22,8 +22,8 @@ let actionItem3 = "Next bill: Internet ($60) is due in 3 days."
 
 export default function Dashboard() {
   return (
-    <Container className="flex flex-wrap min-h-screen w-full p-12">
-      <header>
+    <Container className="flex flex-wrap flex-col w-full p-12">
+      <header className="mb-8">
         <h1 className="text-5xl font-semibold text-gray-800">Good morning, {name}</h1>
         <p className="mt-2 text-gray-500">Here's your financial wellness at a glance.</p>
       </header>
