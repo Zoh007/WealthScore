@@ -35,7 +35,7 @@ interface UseFinancialDataReturn {
 }
 
 // Configuration
-const API_BASE_URL = 'http://localhost:3002/api';
+const API_BASE_URL = '/api';
 const CUSTOMER_ID = '68d8200d9683f20dd5196758';
 const CHECKING_ACCOUNT_ID = '68d8200d9683f20dd5196759';
 const POLLING_INTERVAL = 15000; // 15 seconds - matching nessie-demo real-data-polling.js
