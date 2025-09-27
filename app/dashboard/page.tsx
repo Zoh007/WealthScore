@@ -26,6 +26,9 @@ let actionItem3 = "Next bill: Internet ($60) is due in 3 days."
 
 export default function Dashboard() {
   const { data, isLoading, error, isPolling, startPolling, stopPolling, refreshData } = useFinancialData();
+  
+  // Set the customer name
+  const name = "Sam";
 
   // Start polling when component mounts
   useEffect(() => {
@@ -107,21 +110,10 @@ export default function Dashboard() {
   return (
     <Container className="flex flex-wrap flex-col w-full p-12">
       <header className="mb-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-5xl font-semibold text-indigo-600">
-              Welcome back, <span className="text-gray-800">Customer</span>
-            </h1>
-            <p className="mt-2 text-gray-600">Here's your financial wellness at a glance.</p>
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-gray-500">
-              {isPolling ? "🟢 Live data" : "⏸️ Paused"}
-            </div>
-            <div className="text-xs text-gray-400">
-              Last updated: {data.lastUpdated ? data.lastUpdated.toLocaleTimeString() : 'Never'}
-            </div>
-          </div>
+        <div>
+          <h1 className="text-5xl font-semibold text-indigo-600">
+            Welcome back, <span className="text-gray-800">{name}</span>
+          </h1>
         </div>
       </header>
       
