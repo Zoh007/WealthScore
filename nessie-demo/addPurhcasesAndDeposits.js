@@ -4,7 +4,7 @@ const API_KEY = '5b55b663fcacb05e663e5ce3ea9815ff';
 const BASE_URL = 'http://api.nessieisreal.com';
 
 // Add purchases using existing merchant IDs
-async function addPurchasesWithRealMerchants() {
+async function addPurhcasesAndDeposits() {
   // Use the account IDs from the previous creation
   const checkingAccountId = '68d8200d9683f20dd5196759';
   const savingsAccountId = '68d8200d9683f20dd519675a';
@@ -12,18 +12,16 @@ async function addPurchasesWithRealMerchants() {
   // Real merchant IDs from the API
   const merchants = [
     { id: '68d757c89683f20dd5195f51', name: 'Walmart', category: 'Retail' },
-    { id: '68d757c99683f20dd5195f53', name: 'Starbucks', category: 'Retail' },
-    { id: '68d757c99683f20dd5195f54', name: 'Netflix', category: 'Retail' },
+    { id: '68d757c99683f20dd5195f53', name: 'Starbucks', category: 'Food' },
+    { id: '68d757c99683f20dd5195f54', name: 'Netflix', category: 'Entertainment' },
     { id: '68d757c99683f20dd5195f55', name: 'Kroger', category: 'Retail' },
-    { id: '68d757c99683f20dd5195f56', name: 'DoorDash', category: 'Retail' },
-    { id: '68d757c99683f20dd5195f57', name: 'AMC Theatres', category: 'Retail' },
-    { id: '68d757c99683f20dd5195f58', name: 'Jersey Mike\'s', category: 'Retail' },
-    { id: '68d757c99683f20dd5195f59', name: 'Lyft', category: 'Retail' },
-    { id: '68d757c99683f20dd5195f5a', name: 'Uber', category: 'Retail' },
+    { id: '68d757c99683f20dd5195f56', name: 'DoorDash', category: 'Travel' },
+    { id: '68d757c99683f20dd5195f57', name: 'AMC Theatres', category: 'Entertainment' },
+    { id: '68d757c99683f20dd5195f58', name: 'Jersey Mike\'s', category: 'Food' },
+    { id: '68d757c99683f20dd5195f59', name: 'Lyft', category: 'Travel' },
+    { id: '68d757c99683f20dd5195f5a', name: 'Uber', category: 'Travel' },
     { id: '68d757c99683f20dd5195f5b', name: 'Best Buy', category: 'Retail' }
   ];
-  
-  console.log('🛒 Adding purchases with real merchant data...\n');
 
   // Add purchases to checking account
   console.log('Adding purchases to checking account...');
@@ -100,7 +98,38 @@ async function addPurchasesWithRealMerchants() {
       }
     }
   }
+
+  console.log('\nAdding deposits to checking account...');
+  //add deposits to checking account
+  for (let i = 0; i < 4; i++) {
+    const depositDate = new Date();
+    depositDate.setDate(depositDate.getDate() - (7 * i));
+    const formattedDate = depositDate.toISOString().slice(0, 10);
+
+    const depositData = {
+      medium: "balance",
+      amount: Math.floor(Math.random() * 200) + 100, // Random amount between $100-$310
+      description: `Weekly Wage`,
+      transaction_date: formattedDate // Use the newly formatted date string
+    };
+
+    try {
+      const response = await request
+        .post(`${BASE_URL}/accounts/${checkingAccountId}/deposits?key=${API_KEY}`)
+        .send(depositData)
+        .timeout(10000);
+
+      const depositId = response.body.objectCreated._id;
+      console.log(response.body.objectCreated)
+      
+    } catch (error) {
+      console.error(`❌ Error creating purchase ${i - 4}:`, error.message);
+      if (error.response) {
+        console.error('Response:', error.response.text);
+      }
+    }
+  }
 }
 
 // Run the script
-addPurchasesWithRealMerchants();
+addPurhcasesAndDeposits();
