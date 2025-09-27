@@ -11,7 +11,18 @@ import {
 } from "@/components/ui/card"
 import { useFinancialData } from "@/hooks/use-financial-data";
 import { useEffect } from "react";
+import { ScoreBreakdownAccordion } from "@/components/ScoreBreakdownAccordian";
 
+let score = 67
+let trend = 3
+let status = "Good"
+let name = "Nathan"
+let earned = 2345
+let spent = 1331
+let saved = earned - spent > 0 ? earned - spent : 0
+let actionItem1 = "You've saved an extra $150 this month. Great job!"
+let actionItem2 = "'Dining Out' spending is 15\% higher than last month."
+let actionItem3 = "Next bill: Internet ($60) is due in 3 days."
 
 export default function Dashboard() {
   const { data, isLoading, error, isPolling, startPolling, stopPolling, refreshData } = useFinancialData();
@@ -115,6 +126,7 @@ export default function Dashboard() {
       </header>
       
       <main className="flex items-center justify-around w-full">
+      <div className="flex items-center justify-around w-full">
         <Card className="w-1/5">
           <CardTitle>Cash Flow</CardTitle>
           <CardContent className="text-gray-600">Total Account Balance:</CardContent>
@@ -227,6 +239,10 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+      </div>
+        
+      <div className="mt-12 w-full px-6 mx-auto">
+        <ScoreBreakdownAccordion />
       </div>
     </Container>
   );
