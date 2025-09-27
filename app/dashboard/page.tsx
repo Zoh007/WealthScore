@@ -24,8 +24,8 @@ export default function Dashboard() {
   return (
     <Container className="flex flex-wrap flex-col w-full p-12">
       <header className="mb-8">
-        <h1 className="text-5xl font-semibold text-gray-800">Good morning, {name}</h1>
-        <p className="mt-2 text-gray-500">Here's your financial wellness at a glance.</p>
+        <h1 className="text-5xl font-semibold text-indigo-600">Welcome back, <span className="text-gray-800">{name}</span></h1>
+        <p className="mt-2 text-gray-600">Here's your financial wellness at a glance.</p>
       </header>
       <main className="flex items-center justify-around w-full">
         <Card className="w-1/5">
