@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 
 export type Transaction = {
   _id: string;
-  amount: number;
+  amount?: number; // Make amount optional to handle undefined cases
   description?: string;
   date?: string;
   type: 'deposit' | 'purchase' | 'bill' | 'merchant';
@@ -64,8 +64,9 @@ export const TransactionsTable = ({ transactions }: { transactions: Transaction[
     const filteredTransactions = useMemo(() => {
         return transactions.filter(transaction =>
             transaction.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            transaction.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            transaction.amount.toString().includes(searchTerm)
+            transaction.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (transaction.amount !== undefined && transaction.amount !== null && 
+             transaction.amount.toString().includes(searchTerm))
         );
     }, [transactions, searchTerm]);
     
@@ -134,7 +135,7 @@ export const TransactionsTable = ({ transactions }: { transactions: Transaction[
                                 <td className="px-6 py-4 font-medium text-gray-900">{transaction.description}</td>
                                 <td className="px-6 py-4">{getTypePill(transaction.type)}</td>
                                 <td className={`px-6 py-4 font-medium text-right ${transaction.type === 'deposit' ? 'text-green-600' : 'text-gray-900'}`}>
-                                    {transaction.type === 'deposit' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                                    {transaction.type === 'deposit' ? '+' : '-'}${(transaction.amount ?? 0).toFixed(2)}
                                 </td>
                             </tr>
                         ))}
