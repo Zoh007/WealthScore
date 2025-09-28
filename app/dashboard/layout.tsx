@@ -25,22 +25,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="relative overflow-x-hidden">
-      <SidebarProvider>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
         <AppSidebar />
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <div 
-              className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] bg-purple-100/50 rounded-full blur-3xl -z-100" 
-              aria-hidden="true" 
-          />
-          <div 
-              className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-[60rem] h-[60rem] bg-indigo-100/50 rounded-full blur-3xl -z-100" 
-              aria-hidden="true" 
-          />
+        <main className="flex-grow p-4 min-h-screen">
           <SidebarTrigger />
-          {children}
-        </body>
-      </SidebarProvider>
-    </div>
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 }

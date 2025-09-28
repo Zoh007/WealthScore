@@ -1,4 +1,6 @@
-import { Calendar, Home, Inbox, Search } from "lucide-react"
+"use client";
+
+import { Calendar, Home, Inbox, Codepen } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -7,12 +9,11 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 // Menu items.
 const items = [
@@ -31,40 +32,45 @@ const items = [
     url: "/calendar",
     icon: Calendar,
   },
-]
+  {
+    title: "Simulation Mode",
+    url: "/simulation",
+    icon: Codepen,
+  },
+];
 
 export function AppSidebar() {
   return (
     <Sidebar>
-        <SidebarHeader>
-            <Link href="/">
-            <Image
-                src="/img/logo.png"
-                width="1032"
-                alt="logo"
-                height="32"
-                className="p-3 border-b-2 border-indigo-400"
-            />
-            </Link>
-        </SidebarHeader>
-        <SidebarContent>
-            <SidebarGroup>
-            <SidebarGroupContent>
-                <SidebarMenu>
-                {items.map((item) => (
-                    <SidebarMenuItem key={item.title} className="p-1">
-                    <SidebarMenuButton asChild className="text-base font-medium text-gray-600">
-                        <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                        </a>
-                    </SidebarMenuButton>
-                    </SidebarMenuItem>
-                ))}
-                </SidebarMenu>
-            </SidebarGroupContent>
-            </SidebarGroup>
-        </SidebarContent>
+      <SidebarHeader>
+        <Link href="/" className="block">
+          <Image
+            src="/img/logo.png"
+            width="1032"
+            alt="logo"
+            height="32"
+            className="p-3 border-b-2 border-indigo-400"
+          />
+        </Link>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map((item) => (
+                <SidebarMenuItem key={item.title} className="p-1">
+                  <SidebarMenuButton asChild className="text-base font-medium text-gray-600">
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
     </Sidebar>
-  )
+  );
 }

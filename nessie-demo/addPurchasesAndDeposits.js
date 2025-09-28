@@ -134,4 +134,22 @@ async function addPurchasesAndDeposits() {
 }
 
 // Run the script
-addPurchasesAndDeposits();
+// addPurchasesAndDeposits();
+
+async function delete1() {
+  try {
+      const response = await request
+        .post(`${BASE_URL}/purchases/68d8e4129683f20dd51993ec?key=5b55b663fcacb05e663e5ce3ea9815ff`)
+        .timeout(10000);
+
+      const depositId = response.body.objectCreated?._id || response.body._id;
+      console.log(response.body)
+    } catch (error) {
+      console.log(error)
+      if (error.response) {
+        console.error('Response:', error.response.text || error.response.body);
+      }
+    }
+}
+
+delete1();

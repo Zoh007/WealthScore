@@ -119,9 +119,6 @@ export function useFinancialData(): UseFinancialDataReturn {
     setIsLoading(true);
     setError(null);
 
-    console.log(`\n⏰ ${new Date().toLocaleTimeString()} - Polling Financial Data`);
-    console.log('=' .repeat(50));
-
     try {
       const [accounts, deposits, purchases, bills] = await Promise.all([
         fetchAccounts(),
@@ -129,15 +126,6 @@ export function useFinancialData(): UseFinancialDataReturn {
         fetchPurchases(),
         fetchBills(),
       ]);
-
-      // Log summary like nessie-demo
-      if (accounts.length > 0) {
-        const totalBalance = accounts.reduce((sum, account) => sum + (account.balance || 0), 0);
-        console.log(`💰 Total Balance: $${totalBalance.toLocaleString()}`);
-        accounts.forEach(account => {
-          console.log(`  - ${account.nickname || account._id}: $${account.balance?.toLocaleString() || 0} (${account.type})`);
-        });
-      }
 
       setData({
         accounts,
@@ -157,13 +145,9 @@ export function useFinancialData(): UseFinancialDataReturn {
   // Polling control functions - matching nessie-demo approach
   const startPolling = useCallback(() => {
     if (isPolling) {
-      console.log('⚠️ Already polling financial data');
       return;
     }
-    
     setIsPolling(true);
-    console.log('🚀 Starting financial data polling...\n');
-    
     fetchAllData(); // Initial fetch
     
     const interval = setInterval(fetchAllData, POLLING_INTERVAL);
@@ -176,7 +160,6 @@ export function useFinancialData(): UseFinancialDataReturn {
       setPollingInterval(null);
     }
     setIsPolling(false);
-    console.log('🛑 Financial data polling stopped');
   }, [pollingInterval]);
 
   const refreshData = useCallback(async () => {

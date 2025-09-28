@@ -31,14 +31,6 @@ export default function ChatBot({ className }: ChatBotProps) {
   // Initialize welcome message when financial data is available
   useEffect(() => {
     const totalBalance = financialData.data.accounts?.reduce((sum: number, account: any) => sum + (account.balance || 0), 0) || 0;
-    
-    console.log('ChatBot - Financial data:', {
-      wealthScore: financialData.data.wealthScore,
-      accounts: financialData.data.accounts,
-      totalBalance,
-      isLoading: financialData.isLoading,
-      isPolling: financialData.isPolling
-    });
 
     // Show welcome message once data is loaded or if we have any accounts
     if ((financialData.data.wealthScore > 0 || financialData.data.accounts.length > 0) && messages.length === 0) {
@@ -143,7 +135,7 @@ export default function ChatBot({ className }: ChatBotProps) {
   };
 
   return (
-    <div className={`fixed bottom-6 right-6 z-50 ${className}`}>
+    <div className={`fixed bottom-16 right-6 z-50 ${className}`}>
       {/* Chat Window */}
       {isOpen && (
         <Card className={`w-96 bg-white shadow-2xl border-0 transition-all duration-300 ${
