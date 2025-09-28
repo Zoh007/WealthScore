@@ -193,10 +193,31 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
             <div>
               <h4 className="text-sm font-semibold">Week Analysis</h4>
               <div className="mt-2 flex flex-col gap-2 text-sm">
-                <div>Total deposits: <span className="font-bold">${weekAgg.totalDeposits.toFixed(2)}</span></div>
-                <div>Total payments: <span className="font-bold">${weekAgg.totalPayments.toFixed(2)}</span></div>
-                <div>Transactions: <span className="font-bold">{weekAgg.count}</span></div>
-                <div>Average: <span className="font-bold">${weekAgg.avg.toFixed(2)}</span></div>
+                <div className="font-medium text-muted-foreground">Deposits</div>
+                <div className="pl-2">
+                  <div>Total: <span className="font-bold text-green-600">${weekAgg.totalDeposits.toFixed(2)}</span></div>
+                  <div>Count: <span className="font-bold">{weekAgg.depositCount}</span></div>
+                  {weekAgg.depositCount > 0 && (
+                    <div>Avg per deposit: <span className="font-bold text-green-600">${weekAgg.avgDeposit.toFixed(2)}</span></div>
+                  )}
+                </div>
+                
+                <div className="font-medium text-muted-foreground mt-2">Payments</div>
+                <div className="pl-2">
+                  <div>Total: <span className="font-bold text-red-600">${weekAgg.totalPayments.toFixed(2)}</span></div>
+                  <div>Count: <span className="font-bold">{weekAgg.paymentCount}</span></div>
+                  {weekAgg.paymentCount > 0 && (
+                    <div>Avg per payment: <span className="font-bold text-red-600">${weekAgg.avgPayment.toFixed(2)}</span></div>
+                  )}
+                </div>
+                
+                <div className="font-medium text-muted-foreground mt-2">Summary</div>
+                <div className="pl-2">
+                  <div>Total transactions: <span className="font-bold">{weekAgg.count}</span></div>
+                  <div>Net average: <span className={`font-bold ${weekAgg.netAvgPerTransaction >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    ${weekAgg.netAvgPerTransaction.toFixed(2)}
+                  </span></div>
+                </div>
 
                 {weekAgg.topMerchants && weekAgg.topMerchants.length > 0 && (
                   <div className="mt-3">
@@ -205,7 +226,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                       {weekAgg.topMerchants.map(m => (
                         <div key={m.name} className="flex items-center justify-between rounded-md border p-2">
                           <div className="text-sm">{m.name}</div>
-                          <div className="text-xs text-muted-foreground">{m.count} • ${m.total.toFixed(2)}</div>
+                          <div className="text-xs text-muted-foreground">{m.count} • ${Math.abs(m.total).toFixed(2)}</div>
                         </div>
                       ))}
                     </div>

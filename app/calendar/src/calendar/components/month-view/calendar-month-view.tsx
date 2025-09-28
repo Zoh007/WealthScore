@@ -213,11 +213,32 @@ export function CalendarMonthView({ singleDayEvents, multiDayEvents }: IProps) {
 
       <div className="mt-4 p-4 border-t">
         <h3 className="text-sm font-semibold">Month Analysis</h3>
-        <div className="mt-2 flex gap-6 text-sm">
-          <div>Total deposits: <span className="font-bold">${monthAgg.totalDeposits.toFixed(2)}</span></div>
-          <div>Total payments: <span className="font-bold">${monthAgg.totalPayments.toFixed(2)}</span></div>
-          <div>Transactions: <span className="font-bold">{monthAgg.count}</span></div>
-          <div>Average: <span className="font-bold">${monthAgg.avg.toFixed(2)}</span></div>
+        <div className="mt-2 grid grid-cols-3 gap-4 text-sm">
+          <div className="col-span-1 p-2 rounded-md border">
+            <div className="text-xs font-medium text-muted-foreground">Deposits</div>
+            <div className="mt-1">Total: <span className="font-bold text-green-600">${monthAgg.totalDeposits.toFixed(2)}</span></div>
+            <div>Count: <span className="font-bold">{monthAgg.depositCount}</span></div>
+            {monthAgg.depositCount > 0 && (
+              <div>Avg: <span className="font-bold text-green-600">${monthAgg.avgDeposit.toFixed(2)}</span></div>
+            )}
+          </div>
+          
+          <div className="col-span-1 p-2 rounded-md border">
+            <div className="text-xs font-medium text-muted-foreground">Payments</div>
+            <div className="mt-1">Total: <span className="font-bold text-red-600">${monthAgg.totalPayments.toFixed(2)}</span></div>
+            <div>Count: <span className="font-bold">{monthAgg.paymentCount}</span></div>
+            {monthAgg.paymentCount > 0 && (
+              <div>Avg: <span className="font-bold text-red-600">${monthAgg.avgPayment.toFixed(2)}</span></div>
+            )}
+          </div>
+          
+          <div className="col-span-1 p-2 rounded-md border">
+            <div className="text-xs font-medium text-muted-foreground">Summary</div>
+            <div className="mt-1">Total transactions: <span className="font-bold">{monthAgg.count}</span></div>
+            <div>Net avg: <span className={`font-bold ${monthAgg.netAvgPerTransaction >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              ${monthAgg.netAvgPerTransaction.toFixed(2)}
+            </span></div>
+          </div>
         </div>
       </div>
     </div>

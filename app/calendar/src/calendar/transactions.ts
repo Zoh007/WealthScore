@@ -37,9 +37,30 @@ export function groupTransactionsByDate(transactions: TTransaction[] = []): TTra
 }
 
 export function aggregateTransactions(transactions: TTransaction[] = []) {
-  const totalDeposits = transactions.filter(t => t.type === "deposit").reduce((s, t) => s + (t.amount || 0), 0);
-  const totalPayments = transactions.filter(t => t.type === "purchase" || t.type === "bill").reduce((s, t) => s + (t.amount || 0), 0);
+  // Filter deposits and payments
+  const deposits = transactions.filter(t => t.type === "deposit");
+  const payments = transactions.filter(t => t.type === "purchase" || t.type === "bill");
+  
+  // Calculate totals
+  const totalDeposits = deposits.reduce((s, t) => s + (t.amount || 0), 0);
+  // Make totalPayments a positive number (absolute value of the sum)
+  const rawPaymentsSum = payments.reduce((s, t) => s + (t.amount || 0), 0);
+  const totalPayments = Math.abs(rawPaymentsSum);
+  
+  // Calculate transaction counts
+  const depositCount = deposits.length;
+  const paymentCount = payments.length;
   const count = transactions.length;
+  
+  // Calculate averages (all are positive numbers for better UI interpretation)
+  const avgDeposit = depositCount > 0 ? totalDeposits / depositCount : 0;
+  const avgPayment = paymentCount > 0 ? totalPayments / paymentCount : 0;
+  
+  // Net average per transaction (can be positive or negative)
+  const netTotal = totalDeposits - totalPayments;
+  const netAvgPerTransaction = count > 0 ? netTotal / count : 0;
+  
+  // Keep the original avg for backwards compatibility, but it's confusing so we add better metrics
   const avg = count > 0 ? (transactions.reduce((s, t) => s + (t.amount || 0), 0) / count) : 0;
 
   // top merchants
@@ -56,5 +77,16 @@ export function aggregateTransactions(transactions: TTransaction[] = []) {
     .slice(0, 3)
     .map(([name, stats]) => ({ name, ...stats }));
 
-  return { totalDeposits, totalPayments, count, avg, topMerchants };
+  return { 
+    totalDeposits,
+    totalPayments,
+    count,
+    depositCount, 
+    paymentCount,
+    avgDeposit,
+    avgPayment,
+    netAvgPerTransaction,
+    avg, // kept for backwards compatibility
+    topMerchants 
+  };
 }
