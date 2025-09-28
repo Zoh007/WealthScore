@@ -125,7 +125,6 @@ export function useFinancialData(): UseFinancialDataReturn {
       const response = await fetch(`${API_BASE_URL}/accounts/${CHECKING_ACCOUNT_ID}/purchases`);
       if (!response.ok) throw new Error('Failed to fetch purchases');
       const purchases = await response.json();
-      console.log(purchases)
       return purchases.map(({ purchase_date, ...rest }: any) => ({
         ...rest,
         date: purchase_date,

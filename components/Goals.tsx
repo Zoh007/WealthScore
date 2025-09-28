@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { AddGoalModal } from "./CreateGoalModal";
+import { monitorEventLoopDelay } from "perf_hooks";
 
-export const Goals = ({ savingsRate }: { savingsRate: number }) => {
+export const Goals = ({ savingsRate, monthlyIncome }: { savingsRate: number, monthlyIncome: number }) => {
     const [goals, setGoals] = useState([
-        { name: 'Vacation to Italy', amount: 5000, targetDate: '2026-12-31' }
+        { name: 'Vacation to Italy', amount: 5000, targetDate: '2026-5-10' },
+        { name: 'Car Upgrades', amount: 2500, targetDate: '2025-12-25' }
     ]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const monthlySavings = (60000 / 12) * (savingsRate / 100);
 
     const getStatus = (monthsToGoal: number, targetMonths: number) => {
         if (targetMonths <= 0) return { text: "Date is in the past", color: "text-gray-500", bg: "bg-gray-100" };
@@ -35,20 +35,24 @@ export const Goals = ({ savingsRate }: { savingsRate: number }) => {
             
             <ul className="space-y-3">
                 {goals.length > 0 ? goals.map((goal, index) => {
-                    const monthsToGoal = goal.amount / monthlySavings;
+                    const monthsToGoal = goal.amount / (monthlyIncome * savingsRate / 100);
                     const targetDate = new Date(goal.targetDate);
                     const now = new Date();
                     const targetMonths = (targetDate.getFullYear() - now.getFullYear()) * 12 + (targetDate.getMonth() - now.getMonth());
                     const status = getStatus(monthsToGoal, targetMonths);
+                    console.log(monthsToGoal, monthlyIncome, savingsRate)
 
                     return (
                         <li key={index} className="group p-3 bg-gray-50 rounded-lg flex items-center justify-between">
-                            <div>
-                                <div className="flex items-center">
-                                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${status.color} ${status.bg} mr-3`}>
-                                        {status.text}
-                                    </span>
-                                    <span className="font-medium text-gray-700 text-sm">{goal.name}</span>
+                            <div className="w-full">
+                                <div className="flex w-full items-center justify-between">
+                                    <div>
+                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${status.color} ${status.bg} mr-3`}>
+                                            {status.text}
+                                        </span>
+                                        <span className="font-medium text-gray-700 text-sm">{goal.name} - ${goal.amount}</span>
+                                    </div>
+                                    <span className="font-medium text-gray-700 text-sm mr-4">{goal.targetDate}</span>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-1 pl-1">
                                     Projected to reach in <span className="font-bold text-purple-600">~{Math.round(monthsToGoal)}</span> months.

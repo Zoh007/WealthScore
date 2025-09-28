@@ -1,19 +1,17 @@
 import { useMemo } from "react";
 
-export const FutureProjectionChart = ({ savingsRate }: { savingsRate: number }) => {
-    const income = 60000; // Example annual income
-    
+export const FutureProjectionChart = ({ savingsRate, monthlyIncome, totalBalance }: 
+    { savingsRate: number, monthlyIncome: number, totalBalance: number}) => {    
     const projectionData = useMemo(() => {
         const data = [];
-        let currentValue = 5000; // Starting savings
-        const monthlyContribution = (income / 12) * (savingsRate / 100);
+        const monthlyContribution = monthlyIncome * (savingsRate / 100);
 
         for (let i = 0; i <= 10; i++) { // Project 10 years
-            data.push({ year: `Year ${i}`, value: currentValue });
-            currentValue += monthlyContribution * 12 * 1.05; // Assuming 5% annual growth
+            data.push({ year: `Year ${i}`, value: totalBalance });
+            totalBalance += monthlyContribution * 12 * 1.05; // Assuming 5% annual growth
         }
         return data;
-    }, [savingsRate, income]);
+    }, [savingsRate, monthlyIncome]);
 
     const maxValue = projectionData[projectionData.length - 1].value;
 
@@ -25,9 +23,9 @@ export const FutureProjectionChart = ({ savingsRate }: { savingsRate: number }) 
                 {projectionData.map((d, i) => (
                     <div key={i} className="flex flex-col items-center flex-1 h-full justify-end">
                         <div 
-                            className="w-full bg-purple-400 rounded-t-md transition-all duration-300 ease-out"
+                            className="w-full bg-purple-400 rounded-t-md transition-all duration-300 ease-out flex justify-center items-center text-gray-100"
                             style={{ height: `${(d.value / maxValue) * 100}%` }}
-                        ></div>
+                        >{Math.floor(d.value / 1000)}k</div>
                         <span className="text-xs text-gray-500 mt-2">{d.year}</span>
                     </div>
                 ))}
