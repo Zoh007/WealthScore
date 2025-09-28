@@ -20,7 +20,7 @@ interface Transaction {
   payee_id?: string;
 }
 
-interface FinancialData {
+export interface FinancialData {
   accounts: Account[];
   deposits: Transaction[];
   purchases: Transaction[];

@@ -153,17 +153,16 @@ export default function Dashboard() {
           })}
         </Card>
       </div>
-
-      <div className="p-8">
-        <TransactionsTable transactions={allTransactions } />
+      <div className="w-full p-8">
+        <ScoreBreakdownAccordion data={data}/>
       </div>
       <div className="p-8">
         <BankAccountsDisplay accounts={data.accounts} />
       </div>
-        
-      <div className="mt-12 w-full px-6 mx-auto">
-        <ScoreBreakdownAccordion />
-      </div>
+      <div className="p-8">
+        <TransactionsTable transactions={allTransactions} />
+      </div>        
+
     </Container>
   );
 }
