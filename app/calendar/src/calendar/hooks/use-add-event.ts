@@ -8,17 +8,20 @@ export function useAddEvent() {
   const { setLocalEvents } = useCalendar();
 
   const addEvent = async (event: IEvent) => {
-    const res = await fetch("/api/calendar/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(event),
-    });
-
-    if (!res.ok) throw new Error("Failed to add event");
-
-    const created = await res.json();
-    setLocalEvents(prev => [...prev, created]);
-    return created;
+    // For demo purposes, we'll add the event locally
+    // In a real app, this would make an API call
+    try {
+      const newEvent = {
+        ...event,
+        id: Date.now(), // Ensure we have a unique ID
+      };
+      
+      setLocalEvents(prev => [...prev, newEvent]);
+      return newEvent;
+    } catch (error) {
+      console.error("Failed to add event:", error);
+      throw new Error("Failed to add event");
+    }
   };
 
   return { addEvent };

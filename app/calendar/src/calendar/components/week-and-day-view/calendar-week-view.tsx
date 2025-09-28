@@ -1,8 +1,9 @@
 import { startOfWeek, addDays, format, parseISO, isSameDay, areIntervalsOverlapping, isWithinInterval } from "date-fns";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import { useCalendar } from "@/calendar/contexts/calendar-context";
 import { useFinancialData } from "@/hooks/use-financial-data";
+import { useGoals, type Goal } from "@/hooks/use-goals";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -26,6 +27,7 @@ interface IProps {
 export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
   const { selectedDate, workingHours, visibleHours } = useCalendar();
   const { data: financialData, refreshData } = useFinancialData();
+  const { goals } = useGoals();
 
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, singleDayEvents);
 
@@ -58,6 +60,82 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
   });
 
   const weekAgg = aggregateTransactions(transactionsInWeek as any);
+
+  // Calculate weekly goal progress
+  interface WeeklyGoalProgress extends Goal {
+    status: 'on-track' | 'needs-attention' | 'at-risk' | 'overdue';
+    message: string;
+    color: string;
+    weeksRemaining: number;
+    weeklyAmountNeeded: string;
+    currentWeeklySavings: string;
+    weeklyProgress: number; // percentage
+  }
+
+  const weeklyGoalAnalysis = useMemo((): WeeklyGoalProgress[] | null => {
+    if (!goals.length) return null;
+
+    const netWeeklySavings = weekAgg.totalDeposits - weekAgg.totalPayments;
+    
+    return goals.map((goal): WeeklyGoalProgress => {
+      const targetDate = new Date(goal.targetDate);
+      const weekStartDate = startOfWeek(selectedDate);
+      
+      // Calculate weeks remaining to target date
+      const weeksRemaining = Math.max(0, 
+        Math.ceil((targetDate.getTime() - weekStartDate.getTime()) / (7 * 24 * 60 * 60 * 1000))
+      );
+      
+      if (weeksRemaining === 0) {
+        return {
+          ...goal,
+          status: 'overdue',
+          message: 'Goal deadline has passed',
+          color: 'text-red-600',
+          weeksRemaining,
+          weeklyAmountNeeded: '0',
+          currentWeeklySavings: netWeeklySavings.toFixed(0),
+          weeklyProgress: 0
+        };
+      }
+      
+      const weeklyAmountNeeded = goal.amount / weeksRemaining;
+      const weeklyProgress = weeklyAmountNeeded > 0 ? Math.min(100, Math.max(0, (netWeeklySavings / weeklyAmountNeeded) * 100)) : 0;
+      
+      let status: 'on-track' | 'needs-attention' | 'at-risk';
+      let message: string;
+      let color: string;
+      
+      if (netWeeklySavings <= 0) {
+        status = 'at-risk';
+        message = `This week: spending exceeded income. Need $${weeklyAmountNeeded.toFixed(0)}/week`;
+        color = 'text-red-600';
+      } else if (netWeeklySavings >= weeklyAmountNeeded) {
+        status = 'on-track';
+        message = `Great week! Saved $${netWeeklySavings.toFixed(0)} vs $${weeklyAmountNeeded.toFixed(0)} needed`;
+        color = 'text-green-600';
+      } else if (netWeeklySavings >= weeklyAmountNeeded * 0.7) {
+        status = 'needs-attention';
+        message = `Good progress, but $${(weeklyAmountNeeded - netWeeklySavings).toFixed(0)} short this week`;
+        color = 'text-yellow-600';
+      } else {
+        status = 'at-risk';
+        message = `Behind by $${(weeklyAmountNeeded - netWeeklySavings).toFixed(0)} this week`;
+        color = 'text-red-600';
+      }
+      
+      return {
+        ...goal,
+        status,
+        message,
+        color,
+        weeksRemaining,
+        weeklyAmountNeeded: weeklyAmountNeeded.toFixed(0),
+        currentWeeklySavings: netWeeklySavings.toFixed(0),
+        weeklyProgress
+      };
+    });
+  }, [goals, weekAgg, selectedDate]);
 
   // Debug: log week range and sample transactions to troubleshoot aggregation
   try {
@@ -245,6 +323,72 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                           <div className="text-xs text-muted-foreground">{m.count} • ${Math.abs(m.total).toFixed(2)}</div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Weekly Goal Progress Analysis */}
+                {weeklyGoalAnalysis && weeklyGoalAnalysis.length > 0 && (
+                  <div className="mt-4 pt-3 border-t">
+                    <h5 className="text-xs font-medium text-muted-foreground mb-3">Weekly Goal Progress</h5>
+                    <div className="space-y-3">
+                      {weeklyGoalAnalysis.map((goalProgress) => (
+                        <div key={goalProgress.id} className="p-3 bg-gray-50 rounded-md">
+                          <div className="flex items-center justify-between mb-2">
+                            <h6 className="font-medium text-sm">{goalProgress.name}</h6>
+                            <div className="text-xs text-gray-500">
+                              {goalProgress.weeksRemaining} weeks left
+                            </div>
+                          </div>
+                          
+                          <div className="text-xs text-gray-600 mb-2">
+                            Target: ${goalProgress.amount.toLocaleString()} by {new Date(goalProgress.targetDate).toLocaleDateString()}
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-xs mb-2">
+                            <div>
+                              Need: <span className="font-semibold">${goalProgress.weeklyAmountNeeded}/week</span>
+                            </div>
+                            <div>
+                              This week: <span className="font-semibold">${goalProgress.currentWeeklySavings}</span>
+                            </div>
+                          </div>
+                          
+                          <div className={`text-xs font-medium mb-2 ${goalProgress.color}`}>
+                            {goalProgress.message}
+                          </div>
+                          
+                          {/* Weekly Progress Bar */}
+                          <div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full ${
+                                  goalProgress.status === 'on-track' ? 'bg-green-500' :
+                                  goalProgress.status === 'needs-attention' ? 'bg-yellow-500' :
+                                  'bg-red-500'
+                                }`}
+                                style={{ 
+                                  width: `${Math.min(100, goalProgress.weeklyProgress)}%` 
+                                }}
+                              ></div>
+                            </div>
+                            <div className="flex justify-between text-xs text-gray-500 mt-1">
+                              <span>0%</span>
+                              <span>{goalProgress.weeklyProgress.toFixed(0)}%</span>
+                              <span>100%</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {goals.length === 0 && (
+                  <div className="mt-4 pt-3 border-t">
+                    <div className="text-center py-3 text-gray-500 text-xs">
+                      <p>No financial goals set.</p>
+                      <p className="mt-1">Visit Planning to create goals and track weekly progress.</p>
                     </div>
                   </div>
                 )}

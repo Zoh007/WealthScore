@@ -1,12 +1,9 @@
 import { useState } from "react";
 import { AddGoalModal } from "./CreateGoalModal";
-import { monitorEventLoopDelay } from "perf_hooks";
+import { useGoals } from "@/hooks/use-goals";
 
 export const Goals = ({ savingsRate, monthlyIncome }: { savingsRate: number, monthlyIncome: number }) => {
-    const [goals, setGoals] = useState([
-        { name: 'Vacation to Italy', amount: 5000, targetDate: '2026-5-10' },
-        { name: 'Car Upgrades', amount: 2500, targetDate: '2025-12-25' }
-    ]);
+    const { goals, addGoal, deleteGoal } = useGoals();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const getStatus = (monthsToGoal: number, targetMonths: number) => {
@@ -17,11 +14,11 @@ export const Goals = ({ savingsRate, monthlyIncome }: { savingsRate: number, mon
     };
 
     const handleAddGoal = (newGoal: any) => {
-        setGoals([...goals, newGoal]);
+        addGoal(newGoal);
     };
 
-    const handleDeleteGoal = (goalIndex: number) => {
-        setGoals(goals.filter((_, index) => index !== goalIndex));
+    const handleDeleteGoal = (goalId: string) => {
+        deleteGoal(goalId);
     };
 
     return (
@@ -58,7 +55,7 @@ export const Goals = ({ savingsRate, monthlyIncome }: { savingsRate: number, mon
                                 </p>
                             </div>
                             <button 
-                                onClick={() => handleDeleteGoal(index)} 
+                                onClick={() => handleDeleteGoal(goal.id!)} 
                                 className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

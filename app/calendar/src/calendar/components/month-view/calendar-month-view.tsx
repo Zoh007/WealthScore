@@ -4,14 +4,25 @@ import { useMemo, useEffect, useRef } from "react";
 
 import { useCalendar } from "@/calendar/contexts/calendar-context";
 import { useFinancialData } from "@/hooks/use-financial-data";
+import { useGoals } from "@/hooks/use-goals";
 
 import { DayCell } from "@/calendar/components/month-view/day-cell";
 
 import { getCalendarCells, calculateMonthEventPositions } from "@/calendar/helpers";
 import { groupTransactionsByDate, aggregateTransactions, toDateKey } from "@/calendar/transactions";
 import { startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
+import type { Goal } from "@/hooks/use-goals";
 
 import type { IEvent } from "@/calendar/interfaces";
+
+interface GoalProgress extends Goal {
+  status: 'on-track' | 'needs-attention' | 'at-risk' | 'overdue';
+  message: string;
+  color: string;
+  monthsRemaining: number;
+  monthlyAmountNeeded: string;
+  currentMonthlySavings: string;
+}
 
 interface IProps {
   singleDayEvents: IEvent[];
@@ -23,6 +34,7 @@ const WEEK_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export function CalendarMonthView({ singleDayEvents, multiDayEvents }: IProps) {
   const { selectedDate } = useCalendar();
   const { data: financialData, refreshData } = useFinancialData();
+  const { goals } = useGoals();
 
   const transactions = useMemo(() => {
     // combine deposits, purchases, bills into a unified shape
@@ -62,6 +74,70 @@ export function CalendarMonthView({ singleDayEvents, multiDayEvents }: IProps) {
   }, [transactions, selectedDate]);
 
   const monthAgg = useMemo(() => aggregateTransactions(transactionsInMonth), [transactionsInMonth]);
+
+  // Calculate goal progress interpretation
+  const goalInterpretation = useMemo((): GoalProgress[] | null => {
+    if (!goals.length) return null;
+
+    const netMonthlyIncome = monthAgg.totalDeposits - monthAgg.totalPayments;
+    
+    return goals.map((goal): GoalProgress => {
+      const targetDate = new Date(goal.targetDate);
+      const now = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+      
+      // Calculate months remaining to target date
+      const monthsRemaining = Math.max(0, 
+        (targetDate.getFullYear() - now.getFullYear()) * 12 + 
+        (targetDate.getMonth() - now.getMonth())
+      );
+      
+      if (monthsRemaining === 0) {
+        return {
+          ...goal,
+          status: 'overdue',
+          message: 'Goal deadline has passed',
+          color: 'text-red-600',
+          monthsRemaining,
+          monthlyAmountNeeded: '0',
+          currentMonthlySavings: netMonthlyIncome.toFixed(0)
+        };
+      }
+      
+      const monthlyAmountNeeded = goal.amount / monthsRemaining;
+      
+      let status: 'on-track' | 'needs-attention' | 'at-risk' | 'overdue';
+      let message: string;
+      let color: string;
+      
+      if (netMonthlyIncome <= 0) {
+        status = 'at-risk';
+        message = `Currently spending more than earning. Need to save $${monthlyAmountNeeded.toFixed(0)}/month`;
+        color = 'text-red-600';
+      } else if (netMonthlyIncome >= monthlyAmountNeeded) {
+        status = 'on-track';
+        message = `On track! You're saving $${netMonthlyIncome.toFixed(0)}/month vs $${monthlyAmountNeeded.toFixed(0)} needed`;
+        color = 'text-green-600';
+      } else if (netMonthlyIncome >= monthlyAmountNeeded * 0.7) {
+        status = 'needs-attention';
+        message = `Close but need $${(monthlyAmountNeeded - netMonthlyIncome).toFixed(0)} more per month`;
+        color = 'text-yellow-600';
+      } else {
+        status = 'at-risk';
+        message = `Behind by $${(monthlyAmountNeeded - netMonthlyIncome).toFixed(0)}/month. Consider adjusting timeline`;
+        color = 'text-red-600';
+      }
+      
+      return {
+        ...goal,
+        status,
+        message,
+        color,
+        monthsRemaining,
+        monthlyAmountNeeded: monthlyAmountNeeded.toFixed(0),
+        currentMonthlySavings: netMonthlyIncome.toFixed(0)
+      };
+    });
+  }, [goals, monthAgg, selectedDate]);
 
   const allEvents = [...multiDayEvents, ...singleDayEvents];
 
@@ -240,6 +316,89 @@ export function CalendarMonthView({ singleDayEvents, multiDayEvents }: IProps) {
             </span></div>
           </div>
         </div>
+        
+        {/* Goal Progress Interpretation */}
+        {goalInterpretation && goalInterpretation.length > 0 && (
+          <div className="mt-4 pt-4 border-t">
+            <h4 className="text-sm font-semibold mb-3">Goal Progress Analysis</h4>
+            <div className="space-y-3">
+              {goalInterpretation.map((goalProgress) => (
+                <div key={goalProgress.id} className="p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <h5 className="font-medium text-sm">{goalProgress.name}</h5>
+                    <div className="text-xs text-gray-500">
+                      Target: ${goalProgress.amount.toLocaleString()} by {new Date(goalProgress.targetDate).toLocaleDateString()}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 text-xs">
+                    <div className="flex-1">
+                      <div className="text-gray-600">
+                        Need: <span className="font-semibold">${goalProgress.monthlyAmountNeeded}/month</span>
+                      </div>
+                      <div className="text-gray-600">
+                        Current: <span className="font-semibold">${goalProgress.currentMonthlySavings}/month</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1">
+                      <div className="text-gray-600">
+                        Months left: <span className="font-semibold">{goalProgress.monthsRemaining}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className={`mt-2 text-xs font-medium ${goalProgress.color}`}>
+                    {goalProgress.message}
+                  </div>
+                  
+                  {/* Progress bar */}
+                  <div className="mt-2">
+                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                      <div 
+                        className={`h-1.5 rounded-full ${
+                          goalProgress.status === 'on-track' ? 'bg-green-500' :
+                          goalProgress.status === 'needs-attention' ? 'bg-yellow-500' :
+                          'bg-red-500'
+                        }`}
+                        style={{ 
+                          width: `${Math.min(100, Math.max(0, 
+                            parseFloat(goalProgress.monthlyAmountNeeded) > 0 ? 
+                            (parseFloat(goalProgress.currentMonthlySavings) / parseFloat(goalProgress.monthlyAmountNeeded)) * 100 
+                            : 0
+                          ))}%` 
+                        }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>$0</span>
+                      <span>${goalProgress.monthlyAmountNeeded} needed</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {goals.length === 0 && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="text-center py-4 text-gray-500 text-sm">
+              <p>No financial goals set.</p>
+              <p className="text-xs mt-1">Visit the Planning section to create goals and see progress analysis here.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Show message when no transactions but goals exist */}
+        {goalInterpretation && goalInterpretation.length > 0 && monthAgg.count === 0 && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="text-center py-4 text-gray-500 text-sm">
+              <p>No transactions this month to analyze goal progress.</p>
+              <p className="text-xs mt-1">Add some financial data to see how you're tracking toward your goals.</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

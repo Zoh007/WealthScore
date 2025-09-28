@@ -1,7 +1,7 @@
 "use client";
 
 import { format, parseISO } from "date-fns";
-import { Calendar, Clock, Text, User } from "lucide-react";
+import { Calendar, Clock, Text, User, Target } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EditEventDialog } from "@/calendar/components/dialogs/edit-event-dialog";
@@ -60,6 +60,18 @@ export function EventDetailsDialog({ event, children }: IProps) {
                 <p className="text-sm text-muted-foreground">{event.description}</p>
               </div>
             </div>
+
+            {/* Show goal information if this is a goal event */}
+            {event.kind === 'goal' && event.goalId && event.goalName && (
+              <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <Target className="mt-1 size-4 shrink-0 text-green-600" />
+                <div>
+                  <p className="text-sm font-medium text-green-800">Linked Financial Goal</p>
+                  <p className="text-sm text-green-700">{event.goalName}</p>
+                  <p className="text-xs text-green-600 mt-1">This event is part of your financial planning goals</p>
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
