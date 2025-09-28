@@ -1,5 +1,6 @@
 import { cva } from "class-variance-authority";
 import { endOfDay, format, isSameDay, parseISO, startOfDay } from "date-fns";
+import { Target } from "lucide-react";
 
 import { useCalendar } from "@/calendar/contexts/calendar-context";
 
@@ -111,6 +112,7 @@ export function MonthEventBadge({ event, cellDate, eventCurrentDay, eventTotalDa
                     Day {eventCurrentDay} of {eventTotalDays} •{" "}
                   </span>
                 )}
+                {event.kind === 'goal' && <Target className="inline w-3 h-3 mr-1" />}
                 {event.title}
               </p>
             )}

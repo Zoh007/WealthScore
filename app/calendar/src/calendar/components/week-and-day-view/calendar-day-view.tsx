@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import { useCalendar } from "@/calendar/contexts/calendar-context";
 import { useFinancialData } from "@/hooks/use-financial-data";
+import { useGoals } from "@/hooks/use-goals";
 import { groupTransactionsByDate, toDateKey } from "@/calendar/transactions";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -27,6 +28,7 @@ interface IProps {
 
 export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
   const { selectedDate, setSelectedDate, users, visibleHours, workingHours } = useCalendar();
+  const { goals } = useGoals();
 
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, singleDayEvents);
 
@@ -174,6 +176,39 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
               </div>
             ))}
           </div>
+          
+          {/* Daily Goal Insights */}
+          {goals.length > 0 && (
+            <div className="mt-4 pt-3 border-t">
+              <h5 className="text-sm font-semibold mb-2">Daily Goal Insights</h5>
+              <div className="space-y-2">
+                {goals.slice(0, 2).map(goal => {
+                  const targetDate = new Date(goal.targetDate);
+                  const today = new Date(selectedDate);
+                  const daysRemaining = Math.max(0, Math.ceil((targetDate.getTime() - today.getTime()) / (24 * 60 * 60 * 1000)));
+                  const dailyAmountNeeded = daysRemaining > 0 ? goal.amount / daysRemaining : 0;
+                  const todaysNet = todaysTx.reduce((sum, tx) => sum + (tx.type === 'deposit' ? (tx.amount || 0) : -(tx.amount || 0)), 0);
+                  
+                  return (
+                    <div key={goal.id} className="p-2 bg-gray-50 rounded text-xs">
+                      <div className="font-medium">{goal.name}</div>
+                      <div className="text-gray-600 mt-1">
+                        Need ${dailyAmountNeeded.toFixed(0)}/day • Today: {todaysNet >= 0 ? '+' : ''}${todaysNet.toFixed(0)}
+                      </div>
+                      <div className={`text-xs mt-1 ${todaysNet >= dailyAmountNeeded ? 'text-green-600' : 'text-red-600'}`}>
+                        {todaysNet >= dailyAmountNeeded ? '✓ On track today' : `${Math.abs(dailyAmountNeeded - todaysNet).toFixed(0)} short today`}
+                      </div>
+                    </div>
+                  );
+                })}
+                {goals.length > 2 && (
+                  <div className="text-xs text-gray-500 text-center">
+                    +{goals.length - 2} more goals in Planning
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
