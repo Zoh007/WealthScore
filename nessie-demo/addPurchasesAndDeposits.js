@@ -4,7 +4,7 @@ const API_KEY = '5b55b663fcacb05e663e5ce3ea9815ff';
 const BASE_URL = 'http://api.nessieisreal.com';
 
 // Add purchases using existing merchant IDs
-async function addPurhcasesAndDeposits() {
+async function addPurchasesAndDeposits() {
   // Use the account IDs from the previous creation
   const checkingAccountId = '68d8200d9683f20dd5196759';
   const savingsAccountId = '68d8200d9683f20dd519675a';
@@ -17,7 +17,7 @@ async function addPurhcasesAndDeposits() {
     { id: '68d757c99683f20dd5195f55', name: 'Kroger', category: 'Retail' },
     { id: '68d757c99683f20dd5195f56', name: 'DoorDash', category: 'Travel' },
     { id: '68d757c99683f20dd5195f57', name: 'AMC Theatres', category: 'Entertainment' },
-    { id: '68d757c99683f20dd5195f58', name: 'Jersey Mike\'s', category: 'Food' },
+    { id: '68d757c99683f20dd5195f58', name: "Jersey Mike's", category: 'Food' },
     { id: '68d757c99683f20dd5195f59', name: 'Lyft', category: 'Travel' },
     { id: '68d757c99683f20dd5195f5a', name: 'Uber', category: 'Travel' },
     { id: '68d757c99683f20dd5195f5b', name: 'Best Buy', category: 'Retail' }
@@ -47,16 +47,16 @@ async function addPurhcasesAndDeposits() {
         .send(purchaseData)
         .timeout(10000);
 
-      const purchaseId = response.body.objectCreated._id;
+      const purchaseId = response.body.objectCreated?._id || response.body._id;
       console.log(`✅ Purchase ${i + 1} created: ${purchaseId}`);
       console.log(`   Amount: $${purchaseData.amount}`);
       console.log(`   Merchant: ${merchant.name} (${merchant.category})`);
       console.log(`   Date: ${purchaseData.purchase_date}`);
       
     } catch (error) {
-      console.error(`❌ Error creating purchase ${i + 1}:`, error.message);
+      console.error(`❌ Error creating purchase ${i + 1}:`, error.message || error);
       if (error.response) {
-        console.error('Response:', error.response.text);
+        console.error('Response:', error.response.text || error.response.body);
       }
     }
   }
@@ -85,22 +85,22 @@ async function addPurhcasesAndDeposits() {
         .send(purchaseData)
         .timeout(10000);
 
-      const purchaseId = response.body.objectCreated._id;
+      const purchaseId = response.body.objectCreated?._id || response.body._id;
       console.log(`✅ Purchase ${i - 4} created: ${purchaseId}`);
       console.log(`   Amount: $${purchaseData.amount}`);
       console.log(`   Merchant: ${merchant.name} (${merchant.category})`);
       console.log(`   Date: ${purchaseData.purchase_date}`);
       
     } catch (error) {
-      console.error(`❌ Error creating purchase ${i - 4}:`, error.message);
+      console.error(`❌ Error creating purchase ${i - 4}:`, error.message || error);
       if (error.response) {
-        console.error('Response:', error.response.text);
+        console.error('Response:', error.response.text || error.response.body);
       }
     }
   }
 
   console.log('\nAdding deposits to checking account...');
-  //add deposits to checking account
+  // add deposits to checking account
   for (let i = 0; i < 4; i++) {
     const depositDate = new Date();
     depositDate.setDate(depositDate.getDate() - (7 * i));
@@ -119,17 +119,19 @@ async function addPurhcasesAndDeposits() {
         .send(depositData)
         .timeout(10000);
 
-      const depositId = response.body.objectCreated._id;
-      console.log(response.body.objectCreated)
+      const depositId = response.body.objectCreated?._id || response.body._id;
+      console.log(`✅ Deposit ${i + 1} created: ${depositId}`);
+      console.log(`   Amount: $${depositData.amount}`);
+      console.log(`   Date: ${depositData.transaction_date}`);
       
     } catch (error) {
-      console.error(`❌ Error creating purchase ${i - 4}:`, error.message);
+      console.error(`❌ Error creating deposit ${i + 1}:`, error.message || error);
       if (error.response) {
-        console.error('Response:', error.response.text);
+        console.error('Response:', error.response.text || error.response.body);
       }
     }
   }
 }
 
 // Run the script
-addPurhcasesAndDeposits();
+addPurchasesAndDeposits();
