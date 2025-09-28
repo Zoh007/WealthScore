@@ -28,7 +28,7 @@ export function CalendarHeader({ view, events }: IProps) {
         <div className="flex w-full items-center gap-1.5">
           <div className="inline-flex first:rounded-r-none last:rounded-l-none [&:not(:first-child):not(:last-child)]:rounded-none">
             <Button asChild aria-label="View by day" size="icon" variant={view === "day" ? "default" : "outline"} className="rounded-r-none [&_svg]:size-5">
-              <Link href="/day-view">
+              <Link href="/calendar/day-view">
                 <List strokeWidth={1.8} />
               </Link>
             </Button>
@@ -40,7 +40,7 @@ export function CalendarHeader({ view, events }: IProps) {
               variant={view === "week" ? "default" : "outline"}
               className="-ml-px rounded-none [&_svg]:size-5"
             >
-              <Link href="/week-view">
+              <Link href="/calendar/week-view">
                 <Columns strokeWidth={1.8} />
               </Link>
             </Button>
@@ -52,7 +52,7 @@ export function CalendarHeader({ view, events }: IProps) {
               variant={view === "month" ? "default" : "outline"}
               className="-ml-px rounded-none [&_svg]:size-5"
             >
-              <Link href="/month-view">
+              <Link href="/calendar/month-view">
                 <Grid2x2 strokeWidth={1.8} />
               </Link>
             </Button>
@@ -64,7 +64,7 @@ export function CalendarHeader({ view, events }: IProps) {
               variant={view === "year" ? "default" : "outline"}
               className="-ml-px rounded-none [&_svg]:size-5"
             >
-              <Link href="/year-view">
+              <Link href="/calendar/year-view">
                 <Grid3x3 strokeWidth={1.8} />
               </Link>
             </Button>
@@ -76,7 +76,7 @@ export function CalendarHeader({ view, events }: IProps) {
               variant={view === "agenda" ? "default" : "outline"}
               className="-ml-px rounded-l-none [&_svg]:size-5"
             >
-              <Link href="/agenda-view">
+              <Link href="/calendar/agenda-view">
                 <CalendarRange strokeWidth={1.8} />
               </Link>
             </Button>
