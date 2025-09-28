@@ -18,9 +18,25 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/calendar/*": ["app/calendar/src/calendar/*"],
+      "@/calendar": ["app/calendar/src/calendar"],
+      "@/cookies/*": ["app/calendar/src/cookies/*"],
+      "@/cookies": ["app/calendar/src/cookies"],
+      "@/constants/*": ["app/calendar/src/constants/*"],
+      "@/constants": ["app/calendar/src/constants"],
+      "@/types": ["app/calendar/src/types"],
+      "@/components/*": ["components/*", "app/calendar/src/components/*"],
+      "@/components": ["components"],
+  "@/hooks/*": ["app/calendar/src/hooks/*", "hooks/*"],
+  "@/hooks": ["hooks"],
+      "@/styles/*": ["app/calendar/src/styles/*"],
+      "@/styles": ["app/calendar/src/styles"]
     }
+
+
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
