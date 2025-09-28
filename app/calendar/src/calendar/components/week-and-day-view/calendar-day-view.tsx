@@ -138,59 +138,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
         </ScrollArea>
       </div>
 
-      <div className="hidden w-64 divide-y border-l md:block">
-        <SingleCalendar className="mx-auto w-fit" mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus />
-
-        <div className="flex-1 space-y-3">
-          {currentEvents.length > 0 ? (
-            <div className="flex items-start gap-2 px-4 pt-4">
-              <span className="relative mt-[5px] flex size-2.5">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex size-2.5 rounded-full bg-green-600"></span>
-              </span>
-
-              <p className="text-sm font-semibold text-foreground">Happening now</p>
-            </div>
-          ) : (
-            <p className="p-4 text-center text-sm italic text-muted-foreground">No appointments or consultations at the moment</p>
-          )}
-
-          {currentEvents.length > 0 && (
-            <ScrollArea className="h-[422px] px-4" type="always">
-              <div className="space-y-6 pb-4">
-                {currentEvents.map(event => {
-                  const user = users.find(user => user.id === event.user.id);
-
-                  return (
-                    <div key={event.id} className="space-y-1.5">
-                      <p className="line-clamp-2 text-sm font-semibold">{event.title}</p>
-
-                      {user && (
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <User className="size-3.5" />
-                          <span className="text-sm">{user.name}</span>
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Calendar className="size-3.5" />
-                        <span className="text-sm">{format(new Date(), "MMM d, yyyy")}</span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Clock className="size-3.5" />
-                        <span className="text-sm">
-                          {format(parseISO(event.startDate), "h:mm a")} - {format(parseISO(event.endDate), "h:mm a")}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </ScrollArea>
-          )}
-        </div>
-      </div>
+      {/* Right column removed: calendar displays only the main day grid per user request */}
     </div>
   );
 }
