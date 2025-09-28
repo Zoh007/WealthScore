@@ -38,9 +38,13 @@ export function DayCell({ cell, events, eventPositions, transactionsForDate }: I
         role="button"
         tabIndex={0}
         onClick={() => {
-          setSelectedDate(startOfDay(date));
-          router.push('/calendar/day-view');
-        }}
+            const dayStart = startOfDay(date);
+            setSelectedDate(dayStart);
+            // include the selected date in the url so the calendar layout/provider
+            // can initialize the view to the clicked date after navigation
+            const iso = dayStart.toISOString();
+            router.push(`/calendar/day-view?date=${encodeURIComponent(iso)}`);
+          }}
         className={cn("flex h-full flex-col gap-1 border-l border-t py-1.5 lg:py-2 cursor-pointer hover:bg-muted/30 min-w-0", isSunday && "border-l-0")}
       >
         <span
