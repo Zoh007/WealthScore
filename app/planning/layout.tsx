@@ -25,20 +25,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <SidebarTrigger />
-          <div 
-              className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] bg-purple-100/50 rounded-full blur-3xl -z-100" 
-              aria-hidden="true" 
-          />
-          <div 
-              className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-[60rem] h-[60rem] bg-indigo-100/50 rounded-full blur-3xl -z-100" 
-              aria-hidden="true" 
-          />
-        {children}
-      </body>
-    </SidebarProvider>
+    <div className="relative overflow-x-hidden">
+      <SidebarProvider>
+        <AppSidebar />
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <SidebarTrigger />
+            <div 
+                className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] bg-purple-100/50 rounded-full blur-3xl -z-100" 
+                aria-hidden="true" 
+            />
+            <div 
+                className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-[60rem] h-[60rem] bg-indigo-100/50 rounded-full blur-3xl -z-100" 
+                aria-hidden="true" 
+            />
+          {children}
+        </body>
+      </SidebarProvider>
+    </div>
   );
 }

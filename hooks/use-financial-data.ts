@@ -20,7 +20,7 @@ interface Transaction {
   payee_id?: string;
 }
 
-interface FinancialData {
+export interface FinancialData {
   accounts: Account[];
   deposits: Transaction[];
   purchases: Transaction[];
@@ -109,7 +109,11 @@ export function useFinancialData(): UseFinancialDataReturn {
       const response = await fetch(`${API_BASE_URL}/accounts/${CHECKING_ACCOUNT_ID}/deposits`);
       if (!response.ok) throw new Error('Failed to fetch deposits');
       const deposits = await response.json();
-      return deposits.map((d: any) => ({ ...d, type: 'deposit' as const }));
+      return deposits.map(({ transaction_date, ...rest }: any) => ({
+        ...rest,
+        date: transaction_date,
+        type: 'deposit' as const
+      }));
     } catch (error) {
       console.error('Error fetching deposits:', error);
       return [];
@@ -121,7 +125,12 @@ export function useFinancialData(): UseFinancialDataReturn {
       const response = await fetch(`${API_BASE_URL}/accounts/${CHECKING_ACCOUNT_ID}/purchases`);
       if (!response.ok) throw new Error('Failed to fetch purchases');
       const purchases = await response.json();
-      return purchases.map((p: any) => ({ ...p, type: 'purchase' as const }));
+      console.log(purchases)
+      return purchases.map(({ purchase_date, ...rest }: any) => ({
+        ...rest,
+        date: purchase_date,
+        type: 'purchase' as const
+      }));
     } catch (error) {
       console.error('Error fetching purchases:', error);
       return [];

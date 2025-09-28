@@ -1,8 +1,6 @@
 "use client";
 
 import { Container } from "@/components/Container";
-import Link from "next/link";
-import Image from "next/image";
 import { FinancialScoreDisplay } from "@/components/FinancialScoreDisplay";
 import {
   Card,
@@ -12,24 +10,13 @@ import {
 import { useFinancialData } from "@/hooks/use-financial-data";
 import { useEffect } from "react";
 import { ScoreBreakdownAccordion } from "@/components/ScoreBreakdownAccordian";
+import { Transaction, TransactionsTable } from "@/components/TransactionsTable";
+import { BankAccountsDisplay } from "@/components/BankAccounts";
 
-let score = 67
-let trend = 3
-let status = "Good"
-let name = "Nathan"
-let earned = 2345
-let spent = 1331
-let saved = earned - spent > 0 ? earned - spent : 0
-let actionItem1 = "You've saved an extra $150 this month. Great job!"
-let actionItem2 = "'Dining Out' spending is 15\% higher than last month."
-let actionItem3 = "Next bill: Internet ($60) is due in 3 days."
+let user = "Nathan"
 
 export default function Dashboard() {
-  const { data, isLoading, error, isPolling, startPolling, stopPolling, refreshData } = useFinancialData();
-  
-  // Set the customer name
-  const name = "Sam";
-
+  const { data, isLoading = true, error, isPolling, startPolling, stopPolling, refreshData } = useFinancialData();
   // Start polling when component mounts
   useEffect(() => {
     startPolling();
@@ -46,6 +33,7 @@ export default function Dashboard() {
   const totalSpent = data.purchases.reduce((sum, purchase) => sum + (purchase.amount || 0), 0);
   const totalBills = data.bills.reduce((sum, bill) => sum + (bill.amount || 0), 0);
   const netSavings = totalDeposits - totalSpent - totalBills;
+  const allTransactions = data.deposits.concat(data.purchases)
 
   // Generate dynamic action items based on real data
   const actionItems = [];
@@ -87,16 +75,6 @@ export default function Dashboard() {
     return -2;
   };
 
-  if (isLoading && data.accounts.length === 0) {
-    return (
-      <Container className="flex flex-wrap flex-col w-full p-12">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-gray-600">Loading your financial data...</div>
-        </div>
-      </Container>
-    );
-  }
-
   if (error) {
     return (
       <Container className="flex flex-wrap flex-col w-full p-12">
@@ -109,15 +87,29 @@ export default function Dashboard() {
 
   return (
     <Container className="flex flex-wrap flex-col w-full p-12">
+      {(isLoading && data.accounts.length === 0) && (
+        <div className="text-2xl fixed inset-0 bg-gray-500/70 flex items-center justify-center z-50 font-semibold text-gray-600">Loading Financial Data..</div>
+      )}
       <header className="mb-8">
-        <div>
-          <h1 className="text-5xl font-semibold text-indigo-600">
-            Welcome back, <span className="text-gray-800">{name}</span>
-          </h1>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-5xl font-semibold text-indigo-600">
+              Welcome back, <span className="text-gray-800">{user}</span>
+            </h1>
+            <p className="mt-2 text-gray-600">Here's your financial wellness at a glance.</p>
+          </div>
+          <div className="text-right mr-8">
+            <div className="text-sm text-gray-500">
+              {isPolling ? "Live data" : "Paused"}
+            </div>
+            <div className="text-xs text-gray-400">
+              Last updated: {data.lastUpdated ? data.lastUpdated.toLocaleTimeString() : 'Never'}
+            </div>
+          </div>
         </div>
       </header>
       
-      <main className="flex items-center justify-around w-full">
+      <div className="flex items-center justify-around w-full">
         <Card className="w-1/5">
           <CardTitle>Cash Flow</CardTitle>
           <CardContent className="text-gray-600">Total Account Balance:</CardContent>
@@ -159,82 +151,17 @@ export default function Dashboard() {
             );
           })}
         </Card>
-      </main>
-      
-      {/* Debug info - remove in production */}
-      <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-        <h3 className="text-sm font-semibold mb-2">Debug Info (Real Data):</h3>
-        <div className="text-xs text-gray-600">
-          <p>Accounts: {data.accounts.length}</p>
-          <p>Deposits: {data.deposits.length}</p>
-          <p>Purchases: {data.purchases.length}</p>
-          <p>Bills: {data.bills.length}</p>
-          <p>Wealth Score: {data.wealthScore}</p>
-          
-          {/* Accounts Data */}
-          <div className="mt-4">
-            <h4 className="font-semibold text-sm mb-2">🏦 Accounts ({data.accounts.length}):</h4>
-            {data.accounts.map((account, index) => (
-              <div key={account._id} className="ml-4 mb-2 p-2 bg-white rounded border">
-                <p><strong>Account {index + 1}:</strong> {account.nickname}</p>
-                <p><strong>Type:</strong> {account.type}</p>
-                <p><strong>Balance:</strong> ${account.balance?.toLocaleString()}</p>
-                <p><strong>ID:</strong> {account._id}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Deposits Data */}
-          <div className="mt-4">
-            <h4 className="font-semibold text-sm mb-2">💰 Deposits ({data.deposits.length}):</h4>
-            {data.deposits.map((deposit, index) => (
-              <div key={deposit._id} className="ml-4 mb-2 p-2 bg-white rounded border">
-                <p><strong>Deposit {index + 1}:</strong> {deposit.description}</p>
-                <p><strong>Amount:</strong> ${deposit.amount?.toLocaleString()}</p>
-                <p><strong>Status:</strong> {deposit.status}</p>
-                <p><strong>Medium:</strong> {deposit.medium}</p>
-                <p><strong>ID:</strong> {deposit._id}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Purchases Data */}
-          <div className="mt-4">
-            <h4 className="font-semibold text-sm mb-2">🛒 Purchases ({data.purchases.length}):</h4>
-            {data.purchases.map((purchase, index) => (
-              <div key={purchase._id} className="ml-4 mb-2 p-2 bg-white rounded border">
-                <p><strong>Purchase {index + 1}:</strong> {purchase.description}</p>
-                <p><strong>Amount:</strong> ${purchase.amount?.toLocaleString()}</p>
-                <p><strong>Status:</strong> {purchase.status}</p>
-                <p><strong>Type:</strong> {purchase.type}</p>
-                <p><strong>Merchant ID:</strong> {purchase.merchant_id}</p>
-                <p><strong>ID:</strong> {purchase._id}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Bills Data */}
-          <div className="mt-4">
-            <h4 className="font-semibold text-sm mb-2">📋 Bills ({data.bills.length}):</h4>
-            {data.bills.length === 0 ? (
-              <p className="ml-4 text-gray-500">No bills found</p>
-            ) : (
-              data.bills.map((bill, index) => (
-                <div key={bill._id} className="ml-4 mb-2 p-2 bg-white rounded border">
-                  <p><strong>Bill {index + 1}:</strong> {bill.description}</p>
-                  <p><strong>Amount:</strong> ${bill.amount?.toLocaleString()}</p>
-                  <p><strong>Status:</strong> {bill.status}</p>
-                  <p><strong>ID:</strong> {bill._id}</p>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
       </div>
-        
-      <div className="mt-12 w-full px-6 mx-auto">
-        <ScoreBreakdownAccordion />
+      <div className="w-full p-8">
+        <ScoreBreakdownAccordion data={data}/>
       </div>
+      <div className="p-8">
+        <BankAccountsDisplay accounts={data.accounts} />
+      </div>
+      <div className="p-8">
+        <TransactionsTable transactions={allTransactions} />
+      </div>        
+
     </Container>
   );
 }
