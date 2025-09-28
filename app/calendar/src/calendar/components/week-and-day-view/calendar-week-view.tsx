@@ -14,7 +14,7 @@ import { WeekViewMultiDayEventsRow } from "@/calendar/components/week-and-day-vi
 
 import { cn } from "@/lib/utils";
 import { groupEvents, getEventBlockStyle, isWorkingHour, getVisibleHours } from "@/calendar/helpers";
-import { groupTransactionsByDate, aggregateTransactions } from "@/calendar/transactions";
+import { groupTransactionsByDate, aggregateTransactions, toDateKey } from "@/calendar/transactions";
 
 import type { IEvent } from "@/calendar/interfaces";
 
@@ -88,11 +88,27 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
             <div className="relative z-20 flex border-b">
               <div className="w-18"></div>
               <div className="grid flex-1 grid-cols-7 divide-x border-l">
-                {weekDays.map((day, index) => (
-                  <span key={index} className="py-2 text-center text-xs font-medium text-muted-foreground">
-                    {format(day, "EE")} <span className="ml-1 font-semibold text-foreground">{format(day, "d")}</span>
-                  </span>
-                ))}
+                {weekDays.map((day, index) => {
+                  const dayKey = toDateKey(day);
+                  const dayTransactions = groupTransactionsByDate(allTx as any)[dayKey] || [];
+                  
+                  return (
+                    <div key={index} className="flex flex-col items-center">
+                      <span className="py-1 text-center text-xs font-medium text-muted-foreground">
+                        {format(day, "EE")} <span className="ml-1 font-semibold text-foreground">{format(day, "d")}</span>
+                      </span>
+                      {dayTransactions.length > 0 && (
+                        <div className="flex items-center gap-1 mb-1">
+                          {dayTransactions.some(t => t.type === "deposit") && 
+                            <span className="inline-block w-2 h-2 rounded-full bg-green-500" title="Deposits" />}
+                          {dayTransactions.some(t => t.type === "purchase" || t.type === "bill") && 
+                            <span className="inline-block w-2 h-2 rounded-full bg-red-500" title="Payments" />}
+                          <span className="text-xs text-muted-foreground">{dayTransactions.length}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
