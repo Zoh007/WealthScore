@@ -33,7 +33,7 @@ export default function Dashboard() {
   const totalSpent = data.purchases.reduce((sum, purchase) => sum + (purchase.amount || 0), 0);
   const totalBills = data.bills.reduce((sum, bill) => sum + (bill.amount || 0), 0);
   const netSavings = totalDeposits - totalSpent - totalBills;
-  const allTransactions = data.deposits.concat(data.purchases)
+  const allTransactions = data.deposits.concat(data.purchases).concat(data.bills)
 
   const [wealthScore, setWealthScore] = useState(0);
 
@@ -163,7 +163,6 @@ export default function Dashboard() {
       <div className="p-8">
         <TransactionsTable transactions={allTransactions} />
       </div>        
-
     </Container>
   );
 }
