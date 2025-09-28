@@ -5,11 +5,14 @@ const NESSIE_BASE_URL = 'http://api.nessieisreal.com';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
+    // Await params before using
+    const resolvedParams = await params;
+    
     // Reconstruct the API path
-    const path = params.path.join('/');
+    const path = resolvedParams.path.join('/');
     const searchParams = request.nextUrl.searchParams;
     
     // Build the Nessie API URL
