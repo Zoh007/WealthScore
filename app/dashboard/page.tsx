@@ -30,9 +30,9 @@ export default function Dashboard() {
   // Calculate financial metrics from real data
   const totalBalance = data.accounts.reduce((sum, account) => sum + (account.balance || 0), 0);
   const totalDeposits = data.deposits.reduce((sum, deposit) => sum + (deposit.amount || 0), 0);
-  const totalSpent = data.purchases.reduce((sum, purchase) => sum + (purchase.amount || 0), 0);
   const totalBills = data.bills.reduce((sum, bill) => sum + (bill.amount || 0), 0);
-  const netSavings = totalDeposits - totalSpent - totalBills;
+  const totalSpent = data.purchases.reduce((sum, purchase) => sum + (purchase.amount || 0), 0) + totalBills;
+  const netSavings = totalDeposits - totalSpent;
   const allTransactions = data.deposits.concat(data.purchases).concat(data.bills)
 
   const [wealthScore, setWealthScore] = useState(0);
@@ -56,7 +56,7 @@ export default function Dashboard() {
   }
 
   if (data.bills.length > 0) {
-    const upcomingBill = data.bills[0];
+    const upcomingBill = data.bills[2];
     actionItems.push(`Next bill: ${upcomingBill.description || 'Bill'} ($${upcomingBill.amount})`);
   } else {
     actionItems.push("No upcoming bills detected. Your financial calendar looks clear!");

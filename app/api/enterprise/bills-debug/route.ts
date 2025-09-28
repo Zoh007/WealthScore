@@ -36,9 +36,9 @@ export async function GET(request: NextRequest) {
     const sampleBills = [
       {
         _id: 'sample-bill-today',
-        payment_amount: 120.50,
+        payment_amount: 1120.50,
         upcoming_payment_date: today.toISOString().slice(0, 10),
-        nickname: 'Today\'s Bill',
+        nickname: 'Roof Repairs',
         recurring_date: today.getDate(),
         status: 'pending',
         payee: 'Sample Service Today'
@@ -54,11 +54,11 @@ export async function GET(request: NextRequest) {
       },
       {
         _id: 'sample-bill-yesterday',
-        payment_amount: 45.99,
+        payment_amount: 2245.99,
         upcoming_payment_date: new Date(today.getTime() - 86400000).toISOString().slice(0, 10),
-        nickname: 'Yesterday\'s Bill',
+        nickname: 'Monthly Rent',
         recurring_date: (today.getDate() - 1) || 30,
-        status: 'completed',
+        status: 'executed',
         payee: 'Sample Service Yesterday'
       }
     ];

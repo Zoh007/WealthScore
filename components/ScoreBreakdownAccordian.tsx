@@ -86,7 +86,7 @@ export const ScoreBreakdownAccordion = ({ data, setWealthScore }: { data: Financ
     const getStatus = (score: number): { status: string; color: string } => {
         if (score >= 90) return { status: 'Excellent', color: 'green' };
         if (score >= 75) return { status: 'Good', color: 'green' };
-        if (score >= 60) return { status: 'Fair', color: 'yellow' };
+        if (score >= 50) return { status: 'Fair', color: 'yellow' };
         return { status: 'Needs Improvement', color: 'red' };
     };
 
