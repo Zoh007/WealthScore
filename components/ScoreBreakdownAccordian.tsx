@@ -1,5 +1,5 @@
 import { FinancialData } from "@/hooks/use-financial-data";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AccordionItem } from "./AccordionItem";
 
 export const ScoreBreakdownAccordion = ({ data, setWealthScore }: { data: FinancialData, setWealthScore: React.Dispatch<React.SetStateAction<number>> }) => {
@@ -54,7 +54,7 @@ export const ScoreBreakdownAccordion = ({ data, setWealthScore }: { data: Financ
     }).reduce((sum, bill) => sum + bill.amount, 0);
 
 
-    const scoreCalculations = useMemo(() => {
+    const { scores, accordionItems } = useMemo(() => {
         // --- Calculation Logic ---
         const calculateSavingsScore = () => {
             if (monthlyIncome === 0) return 0;
@@ -91,7 +91,7 @@ export const ScoreBreakdownAccordion = ({ data, setWealthScore }: { data: Financ
             return { status: 'Needs Improvement', color: 'red' };
         };
 
-        const scores = {
+        const calculatedScores = {
             savings: calculateSavingsScore(),
             spending: calculateSpendingScore(),
             bills: calculateBillsScore(),
@@ -99,52 +99,56 @@ export const ScoreBreakdownAccordion = ({ data, setWealthScore }: { data: Financ
             debt: calculateDebtScore(),
         };
 
-        //WealthScore will be a weighted average of all these scores
-        setWealthScore((.25) * scores.savings + (.20) * scores.spending + (.20) * scores.bills + (.15) * scores.liquidity + (.20) * scores.debt)
-
-        return [
+        const items = [
             {
                 title: 'Savings Ratio',
-                score: scores.savings,
-                ...getStatus(scores.savings),
+                score: calculatedScores.savings,
+                ...getStatus(calculatedScores.savings),
                 content: `Based on your income of $${monthlyIncome.toFixed(2)} and savings of $${monthlySavings.toFixed(2)}, your savings rate is ${((monthlySavings / monthlyIncome) * 100 || 0).toFixed(1)}%. We recommend a target of 30% for an excellent score.`
             },
             {
                 title: 'Spending Balance',
-                score: scores.spending,
-                ...getStatus(scores.spending),
+                score: calculatedScores.spending,
+                ...getStatus(calculatedScores.spending),
                 content: `You've spent $${discretionarySpending.toFixed(2)} out of your $${discretionaryBudget.toFixed(2)} discretionary budget. Staying within your budget is key to a high score.`
             },
             {
                 title: 'Bill Timeliness',
-                score: scores.bills,
-                ...getStatus(scores.bills),
+                score: calculatedScores.bills,
+                ...getStatus(calculatedScores.bills),
                 content: `You've paid ${billsOnTime} out of ${totalBills} bills on time. Punctual payments have a very strong positive impact on your financial health.`
             },
             {
                 title: 'Emergency Cushion (Liquidity)',
-                score: scores.liquidity,
-                ...getStatus(scores.liquidity),
+                score: calculatedScores.liquidity,
+                ...getStatus(calculatedScores.liquidity),
                 content: `With $${availableBalance.toFixed(2)} available and $${upcomingBills.toFixed(2)} in upcoming bills, your liquidity is being assessed. Having a balance that covers upcoming expenses is crucial.`
             },
             {
                 title: 'Debt / Risk Management',
-                score: scores.debt,
-                ...getStatus(scores.debt),
+                score: calculatedScores.debt,
+                ...getStatus(calculatedScores.debt),
                 content: `Your outstanding debt is $${outstandingDebt.toFixed(2)} relative to your monthly income of $${monthlyIncome.toFixed(2)}. Keeping debt low compared to income is a sign of good risk management.`
             },
         ];
-    }, [data]);
+        return { scores: calculatedScores, accordionItems: items };
+    }, [monthlyIncome, monthlySavings, discretionaryBudget, discretionarySpending, totalBills, billsOnTime, upcomingBills, availableBalance, outstandingDebt]);
 
     const handleItemClick = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);
     };
 
+    useEffect(() => {
+        // This code runs *after* the component renders, whenever `scores` changes.
+        const wealthScore = (0.25 * scores.savings) + (0.20 * scores.spending) + (0.20 * scores.bills) + (0.15 * scores.liquidity) + (0.20 * scores.debt);
+        setWealthScore(wealthScore);
+    }, [scores, setWealthScore]); // Dependency array ensures this runs when needed.
+
     return (
         <div className="bg-white rounded-2xl shadow-lg">
             <h3 className="font-bold text-xl text-gray-800 p-5">Score Breakdown</h3>
             <div className="divide-y divide-gray-200">
-                {scoreCalculations.map((item, index) => (
+                {accordionItems.map((item, index) => (
                     <AccordionItem
                         key={index}
                         title={item.title}
