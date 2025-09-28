@@ -17,7 +17,6 @@ let user = "Nathan"
 
 export default function Dashboard() {
   const { data, isLoading = true, error, isPolling, startPolling, stopPolling, refreshData } = useFinancialData();
-
   // Start polling when component mounts
   useEffect(() => {
     startPolling();
