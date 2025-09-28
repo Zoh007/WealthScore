@@ -52,14 +52,15 @@ export async function GET(
 // Handle other HTTP methods if needed
 export async function POST(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const path = params.path.join('/');
+    const resolvedParams = await params;
+    const path = resolvedParams.path.join('/');
     const searchParams = request.nextUrl.searchParams;
     const body = await request.json();
     
-    const apiUrl = `${NESSIE_BASE_URL}/${path}?key=${NESSIE_API_KEY}${searchParams.toString() ? `&${searchParams.toString()}` : ''}`;
+      const apiUrl = `${NESSIE_BASE_URL}/${path}?key=${NESSIE_API_KEY}${searchParams.toString() ? `&${searchParams.toString()}` : ''}`;
     
     console.log('🔄 Proxying POST request to:', apiUrl);
     

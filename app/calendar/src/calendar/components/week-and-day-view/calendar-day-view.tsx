@@ -1,7 +1,10 @@
 import { Calendar, Clock, User } from "lucide-react";
 import { parseISO, areIntervalsOverlapping, format } from "date-fns";
+import { useEffect } from "react";
 
 import { useCalendar } from "@/calendar/contexts/calendar-context";
+import { useFinancialData } from "@/hooks/use-financial-data";
+import { groupTransactionsByDate, toDateKey } from "@/calendar/transactions";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SingleCalendar } from "@/components/ui/single-calendar";
@@ -39,6 +42,21 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
   });
 
   const groupedEvents = groupEvents(dayEvents);
+
+  // Transactions for the selected day
+  const { data: financialData, refreshData } = useFinancialData();
+  useEffect(() => {
+    if (refreshData) refreshData();
+  }, [refreshData]);
+
+  const allTx = [
+    ...(financialData.deposits || []).map(d => ({ ...d, type: "deposit" as const, date: d.date })),
+    ...(financialData.purchases || []).map(p => ({ ...p, type: "purchase" as const, date: p.date })),
+    ...(financialData.bills || []).map(b => ({ ...b, type: "bill" as const, date: b.date })),
+  ];
+
+  const txMap = groupTransactionsByDate(allTx as any);
+  const todaysTx = txMap[toDateKey(selectedDate)] || [];
 
   return (
     <div className="flex">
@@ -138,7 +156,26 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
         </ScrollArea>
       </div>
 
-      {/* Right column removed: calendar displays only the main day grid per user request */}
+      {/* Right column: transactions summary for the selected day */}
+      <div className="hidden w-96 flex-col gap-4 border-l p-4 lg:flex">
+        <div>
+          <h4 className="text-sm font-semibold">Transactions for {format(selectedDate, 'MMM d, yyyy')}</h4>
+          <div className="mt-2 flex flex-col gap-2">
+            {todaysTx.length === 0 && <div className="text-sm text-muted-foreground">No transactions</div>}
+            {todaysTx.map(tx => (
+              <div key={tx._id || tx.description} className="flex items-center justify-between rounded-md border p-2">
+                <div>
+                  <div className="text-sm font-medium">{(tx as any).merchant_name || tx.description || tx.merchant_id || 'Transaction'}</div>
+                  <div className="text-xs text-muted-foreground">{tx.type}</div>
+                </div>
+                <div className={tx.type === 'deposit' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                  {tx.type === 'deposit' ? '+' : '-'}${Math.abs(tx.amount || 0).toFixed(2)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

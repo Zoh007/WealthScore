@@ -86,14 +86,32 @@ export function useFinancialData(): UseFinancialDataReturn {
     }
   }, []);
 
+  const fetchMerchants = useCallback(async (): Promise<any[]> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/merchants`);
+      if (!response.ok) throw new Error('Failed to fetch merchants');
+      const merchants = await response.json();
+      return merchants;
+    } catch (error) {
+      console.error('Error fetching merchants:', error);
+      return [];
+    }
+  }, []);
+
   const fetchPurchases = useCallback(async (): Promise<Transaction[]> => {
     try {
       const response = await fetch(`${API_BASE_URL}/accounts/${CHECKING_ACCOUNT_ID}/purchases`);
       if (!response.ok) throw new Error('Failed to fetch purchases');
       const purchases = await response.json();
-      return purchases.map(({ purchase_date, ...rest }: any) => ({
+      // We'll attach merchant_name if available from a merchants fetch that
+      // may have populated a cached map on the latest data fetch. If not,
+      // keep merchant_id and description as-is.
+      return purchases.map(({ purchase_date, merchant_id, description, ...rest }: any) => ({
         ...rest,
         date: purchase_date,
+        merchant_id,
+        // keep description but prefer merchant_name if later populated
+        description: description || merchant_id,
         type: 'purchase' as const
       }));
     } catch (error) {
@@ -123,12 +141,35 @@ export function useFinancialData(): UseFinancialDataReturn {
     console.log('=' .repeat(50));
 
     try {
-      const [accounts, deposits, purchases, bills] = await Promise.all([
+      // Fetch merchants first so we can resolve merchant names for purchases
+      const [merchants, accounts, deposits, purchases, bills] = await Promise.all([
+        fetchMerchants(),
         fetchAccounts(),
         fetchDeposits(),
         fetchPurchases(),
         fetchBills(),
       ]);
+
+      // Build merchant id -> name map
+      const merchantMap: Record<string, string> = {};
+      if (Array.isArray(merchants)) {
+        merchants.forEach((m: any) => {
+          const id = m._id || m.id || m.merchant_id;
+          const name = m.name || m.merchant_name || m.description;
+          if (id && name) merchantMap[id] = name;
+        });
+      }
+
+      // If purchases include merchant_id, replace description with merchant name when available
+      const purchasesWithNames = purchases.map((p: any) => {
+        const mid = p.merchant_id;
+        const merchantName = mid ? merchantMap[mid] : undefined;
+        return {
+          ...p,
+          description: p.description || merchantName || p.merchant_id || p._id || p.description,
+          merchant_name: merchantName,
+        };
+      });
 
       // Log summary like nessie-demo
       if (accounts.length > 0) {
@@ -142,7 +183,7 @@ export function useFinancialData(): UseFinancialDataReturn {
       setData({
         accounts,
         deposits,
-        purchases,
+        purchases: purchasesWithNames,
         bills,
         lastUpdated: new Date(),
       });

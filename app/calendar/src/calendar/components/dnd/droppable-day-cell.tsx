@@ -50,7 +50,8 @@ export function DroppableDayCell({ cell, children }: DroppableDayCellProps) {
   );
 
   return (
-    <div ref={drop as unknown as React.RefObject<HTMLDivElement>} className={cn(isOver && canDrop && "bg-accent/50")}>
+    // add min-w-0 so grid items can shrink and not force the grid to grow
+    <div ref={drop as unknown as React.RefObject<HTMLDivElement>} className={cn("min-w-0", isOver && canDrop && "bg-accent/50")}>
       {children}
     </div>
   );

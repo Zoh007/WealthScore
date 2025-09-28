@@ -192,7 +192,10 @@ export function getCalendarCells(selectedDate: Date): ICalendarCell[] {
     date: new Date(currentYear, currentMonth, i + 1),
   }));
 
-  const nextMonthCells = Array.from({ length: (7 - (totalDays % 7)) % 7 }, (_, i) => ({
+  // Always render a full 6-week grid (42 cells) so the calendar height is consistent
+  // like Google Calendar. Calculate how many cells are remaining to reach 42.
+  const remaining = Math.max(0, 42 - totalDays);
+  const nextMonthCells = Array.from({ length: remaining }, (_, i) => ({
     day: i + 1,
     currentMonth: false,
     date: new Date(currentYear, currentMonth + 1, i + 1),

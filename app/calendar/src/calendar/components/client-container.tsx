@@ -90,7 +90,8 @@ export function ClientContainer({ view }: IProps) {
   }, [filteredEvents]);
 
   return (
-    <div className="overflow-hidden rounded-xl border">
+  // Force a consistent centered card width so the calendar doesn't visually shrink between months
+  <div className="w-full max-w-[1200px] mx-auto min-w-[1052px] overflow-hidden rounded-xl border">
       <CalendarHeader view={view} events={filteredEvents} />
 
       <DndProviderWrapper>

@@ -4,14 +4,7 @@ import { createContext, useContext, ReactNode, useEffect } from 'react';
 import { useFinancialData } from '@/hooks/use-financial-data';
 
 interface FinancialDataContextType {
-  data: {
-    accounts: any[];
-    deposits: any[];
-    purchases: any[];
-    bills: any[];
-    wealthScore: number;
-    lastUpdated: Date | null;
-  };
+  data: any;
   isLoading: boolean;
   error: string | null;
   isPolling: boolean;
