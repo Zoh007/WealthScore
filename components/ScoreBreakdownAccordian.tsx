@@ -2,7 +2,7 @@ import { FinancialData } from "@/hooks/use-financial-data";
 import { useMemo, useState } from "react";
 import { AccordionItem } from "./AccordionItem";
 
-export const ScoreBreakdownAccordion = ({ data }: { data: FinancialData }) => {
+export const ScoreBreakdownAccordion = ({ data, setWealthScore }: { data: FinancialData, setWealthScore: React.Dispatch<React.SetStateAction<number>> }) => {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
     const monthlyIncome = data.deposits.reduce((sum, deposit) => sum + (deposit.amount || 0), 0);
     const discretionarySpending = data.purchases.reduce((sum, purchase) => sum + (purchase.amount || 0), 0);
@@ -98,6 +98,9 @@ export const ScoreBreakdownAccordion = ({ data }: { data: FinancialData }) => {
             liquidity: calculateLiquidityScore(),
             debt: calculateDebtScore(),
         };
+
+        //WealthScore will be a weighted average of all these scores
+        setWealthScore((.25) * scores.savings + (.20) * scores.spending + (.20) * scores.bills + (.15) * scores.liquidity + (.20) * scores.debt)
 
         return [
             {

@@ -25,7 +25,6 @@ export interface FinancialData {
   deposits: Transaction[];
   purchases: Transaction[];
   bills: Transaction[];
-  wealthScore: number;
   lastUpdated: Date | null;
 }
 
@@ -43,39 +42,7 @@ interface UseFinancialDataReturn {
 const API_BASE_URL = '/api';
 const CUSTOMER_ID = '68d8200d9683f20dd5196758';
 const CHECKING_ACCOUNT_ID = '68d8200d9683f20dd5196759';
-const POLLING_INTERVAL = 15000; // 15 seconds - matching nessie-demo real-data-polling.js
-
-// Wealth score calculation - matching nessie-demo real-data-polling.js logic
-function calculateWealthScore(accounts: Account[], deposits: Transaction[], purchases: Transaction[], bills: Transaction[]): number {
-  if (accounts.length === 0) return 0;
-
-  const totalBalance = accounts.reduce((sum, account) => sum + (account.balance || 0), 0);
-  const totalDeposits = deposits.reduce((sum, deposit) => sum + (deposit.amount || 0), 0);
-  const totalSpent = purchases.reduce((sum, purchase) => sum + (purchase.amount || 0), 0);
-  const totalBills = bills.reduce((sum, bill) => sum + (bill.amount || 0), 0);
-
-  // Wealth score factors (matching nessie-demo):
-  // 1. Account balance (40%)
-  // 2. Deposit frequency (30%) 
-  // 3. Spending control (20%)
-  // 4. Account diversity (10%)
-  
-  const balanceScore = Math.min(totalBalance / 10000, 100) * 0.4; // Max 100 points for $10k+
-  const depositScore = Math.min(deposits.length * 15, 100) * 0.3; // Max 100 points for 6+ deposits
-  const spendingScore = totalSpent > 0 ? Math.min(100 - (totalSpent / totalDeposits * 100), 100) * 0.2 : 50 * 0.2;
-  const diversityScore = accounts.length >= 2 ? 100 * 0.1 : accounts.length * 50 * 0.1;
-
-  const wealthScore = Math.round(balanceScore + depositScore + spendingScore + diversityScore);
-  
-  console.log(`\n📊 WEALTH SCORE CALCULATION (Real Data):`);
-  console.log(`💰 Balance Score: ${Math.round(balanceScore)}/40 ($${totalBalance.toLocaleString()})`);
-  console.log(`📈 Deposit Score: ${Math.round(depositScore)}/30 (${deposits.length} deposits, $${totalDeposits.toLocaleString()})`);
-  console.log(`💸 Spending Score: ${Math.round(spendingScore)}/20 ($${totalSpent.toLocaleString()} spent)`);
-  console.log(`🏦 Diversity Score: ${Math.round(diversityScore)}/10 (${accounts.length} accounts)`);
-  console.log(`🎯 TOTAL WEALTH SCORE: ${wealthScore}/100`);
-
-  return wealthScore;
-}
+const POLLING_INTERVAL = 60000; // 60 seconds - matching nessie-demo real-data-polling.js
 
 export function useFinancialData(): UseFinancialDataReturn {
   const [data, setData] = useState<FinancialData>({
@@ -83,7 +50,6 @@ export function useFinancialData(): UseFinancialDataReturn {
     deposits: [],
     purchases: [],
     bills: [],
-    wealthScore: 0,
     lastUpdated: null,
   });
   
@@ -164,8 +130,6 @@ export function useFinancialData(): UseFinancialDataReturn {
         fetchBills(),
       ]);
 
-      const wealthScore = calculateWealthScore(accounts, deposits, purchases, bills);
-
       // Log summary like nessie-demo
       if (accounts.length > 0) {
         const totalBalance = accounts.reduce((sum, account) => sum + (account.balance || 0), 0);
@@ -180,7 +144,6 @@ export function useFinancialData(): UseFinancialDataReturn {
         deposits,
         purchases,
         bills,
-        wealthScore,
         lastUpdated: new Date(),
       });
     } catch (error) {

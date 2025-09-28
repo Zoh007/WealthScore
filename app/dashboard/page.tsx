@@ -8,7 +8,7 @@ import {
   CardContent,
 } from "@/components/ui/card"
 import { useFinancialData } from "@/hooks/use-financial-data";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ScoreBreakdownAccordion } from "@/components/ScoreBreakdownAccordian";
 import { Transaction, TransactionsTable } from "@/components/TransactionsTable";
 import { BankAccountsDisplay } from "@/components/BankAccounts";
@@ -34,6 +34,8 @@ export default function Dashboard() {
   const totalBills = data.bills.reduce((sum, bill) => sum + (bill.amount || 0), 0);
   const netSavings = totalDeposits - totalSpent - totalBills;
   const allTransactions = data.deposits.concat(data.purchases)
+
+  const [wealthScore, setWealthScore] = useState(0);
 
   // Generate dynamic action items based on real data
   const actionItems = [];
@@ -133,9 +135,9 @@ export default function Dashboard() {
         </Card>
         
         <FinancialScoreDisplay 
-          score={data.wealthScore} 
-          trend={getScoreTrend(data.wealthScore)} 
-          status={getScoreStatus(data.wealthScore)} 
+          score={wealthScore} 
+          trend={getScoreTrend(wealthScore)} 
+          status={getScoreStatus(wealthScore)} 
         />
         
         <Card className="w-1/5">
@@ -153,7 +155,7 @@ export default function Dashboard() {
         </Card>
       </div>
       <div className="w-full p-8">
-        <ScoreBreakdownAccordion data={data}/>
+        <ScoreBreakdownAccordion data={data} setWealthScore={setWealthScore}/>
       </div>
       <div className="p-8">
         <BankAccountsDisplay accounts={data.accounts} />

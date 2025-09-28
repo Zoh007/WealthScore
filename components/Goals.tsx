@@ -40,7 +40,6 @@ export const Goals = ({ savingsRate, monthlyIncome }: { savingsRate: number, mon
                     const now = new Date();
                     const targetMonths = (targetDate.getFullYear() - now.getFullYear()) * 12 + (targetDate.getMonth() - now.getMonth());
                     const status = getStatus(monthsToGoal, targetMonths);
-                    console.log(monthsToGoal, monthlyIncome, savingsRate)
 
                     return (
                         <li key={index} className="group p-3 bg-gray-50 rounded-lg flex items-center justify-between">
