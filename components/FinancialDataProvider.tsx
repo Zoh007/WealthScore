@@ -30,7 +30,7 @@ export function FinancialDataProvider({ children }: { children: ReactNode }) {
         financialData.stopPolling();
       }
     };
-  }, [financialData]);
+  }, [financialData.isPolling, financialData.startPolling, financialData.stopPolling]);
 
   return (
     <FinancialDataContext.Provider value={financialData}>

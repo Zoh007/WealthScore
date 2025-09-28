@@ -1,5 +1,5 @@
 import { FinancialData } from "@/hooks/use-financial-data";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { AccordionItem } from "./AccordionItem";
 
 export const ScoreBreakdownAccordion = ({ data, setWealthScore }: { data: FinancialData, setWealthScore: React.Dispatch<React.SetStateAction<number>> }) => {
@@ -54,54 +54,65 @@ export const ScoreBreakdownAccordion = ({ data, setWealthScore }: { data: Financ
     }).reduce((sum, bill) => sum + bill.amount, 0);
 
 
+    // Calculate individual scores
+    const calculateSavingsScore = () => {
+        if (monthlyIncome === 0) return 0;
+        const savingsRatio = monthlySavings / monthlyIncome;
+        // Assumes 30% savings rate is ideal (100 points)
+        return Math.min((savingsRatio < 0 ? 0 : savingsRatio) * 100 / 0.3, 100);
+    };
+
+    const calculateSpendingScore = () => {
+        if (discretionaryBudget === 0) return 100;
+        return Math.max(0, 100 - (discretionarySpending / discretionaryBudget) * 100);
+    };
+
+    const calculateBillsScore = () => {
+        if (totalBills === 0) return 100;
+        return (billsOnTime / totalBills) * 100;
+    };
+
+    const calculateLiquidityScore = () => {
+        if (upcomingBills === 0) return 100;
+        return Math.min((availableBalance / upcomingBills) * 100, 100);
+    };
+
+    const calculateDebtScore = () => {
+        if (monthlyIncome === 0) return 0;
+        return Math.max(0, 100 - (outstandingDebt / monthlyIncome) * 100);
+    };
+
+    // Get status for a score
+    const getStatus = (score: number): { status: string; color: string } => {
+        if (score >= 90) return { status: 'Excellent', color: 'green' };
+        if (score >= 75) return { status: 'Good', color: 'green' };
+        if (score >= 60) return { status: 'Fair', color: 'yellow' };
+        return { status: 'Needs Improvement', color: 'red' };
+    };
+
+    // Calculate scores once and store them
+    const scores = useMemo(() => ({
+        savings: calculateSavingsScore(),
+        spending: calculateSpendingScore(),
+        bills: calculateBillsScore(),
+        liquidity: calculateLiquidityScore(),
+        debt: calculateDebtScore(),
+    }), [monthlyIncome, monthlySavings, discretionaryBudget, discretionarySpending, totalBills, billsOnTime, upcomingBills, availableBalance, outstandingDebt]);
+
+    // Update wealth score when component scores change
+    useEffect(() => {
+        // Calculate WealthScore as a weighted average of all scores - rounded to an integer
+        const calculatedScore = Math.round(
+            (.25) * scores.savings + 
+            (.20) * scores.spending + 
+            (.20) * scores.bills + 
+            (.15) * scores.liquidity + 
+            (.20) * scores.debt
+        );
+        setWealthScore(calculatedScore);
+    }, [scores, setWealthScore]);
+
     const scoreCalculations = useMemo(() => {
-        // --- Calculation Logic ---
-        const calculateSavingsScore = () => {
-            if (monthlyIncome === 0) return 0;
-            const savingsRatio = monthlySavings / monthlyIncome;
-            // Assumes 30% savings rate is ideal (100 points)
-            return Math.min((savingsRatio < 0 ? 0 : savingsRatio) * 100 / 0.3, 100);
-        };
-
-        const calculateSpendingScore = () => {
-            if (discretionaryBudget === 0) return 100;
-            return Math.max(0, 100 - (discretionarySpending / discretionaryBudget) * 100);
-        };
-
-        const calculateBillsScore = () => {
-            if (totalBills === 0) return 100;
-            return (billsOnTime / totalBills) * 100;
-        };
-
-        const calculateLiquidityScore = () => {
-            if (upcomingBills === 0) return 100;
-            return Math.min((availableBalance / upcomingBills) * 100, 100);
-        };
-
-        const calculateDebtScore = () => {
-            if (monthlyIncome === 0) return 0;
-            return Math.max(0, 100 - (outstandingDebt / monthlyIncome) * 100);
-        };
-
-        // --- Generate Status & Content ---
-        const getStatus = (score: number): { status: string; color: string } => {
-            if (score >= 90) return { status: 'Excellent', color: 'green' };
-            if (score >= 75) return { status: 'Good', color: 'green' };
-            if (score >= 60) return { status: 'Fair', color: 'yellow' };
-            return { status: 'Needs Improvement', color: 'red' };
-        };
-
-        const scores = {
-            savings: calculateSavingsScore(),
-            spending: calculateSpendingScore(),
-            bills: calculateBillsScore(),
-            liquidity: calculateLiquidityScore(),
-            debt: calculateDebtScore(),
-        };
-
-        //WealthScore will be a weighted average of all these scores
-        setWealthScore((.25) * scores.savings + (.20) * scores.spending + (.20) * scores.bills + (.15) * scores.liquidity + (.20) * scores.debt)
-
         return [
             {
                 title: 'Savings Ratio',
@@ -134,7 +145,18 @@ export const ScoreBreakdownAccordion = ({ data, setWealthScore }: { data: Financ
                 content: `Your outstanding debt is $${outstandingDebt.toFixed(2)} relative to your monthly income of $${monthlyIncome.toFixed(2)}. Keeping debt low compared to income is a sign of good risk management.`
             },
         ];
-    }, [data]);
+    }, [
+        scores, 
+        monthlyIncome, 
+        monthlySavings, 
+        discretionarySpending, 
+        discretionaryBudget, 
+        billsOnTime, 
+        totalBills,
+        availableBalance, 
+        upcomingBills, 
+        outstandingDebt
+    ]);
 
     const handleItemClick = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);

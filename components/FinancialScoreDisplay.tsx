@@ -61,7 +61,7 @@ export const FinancialScoreDisplay: React.FC<FinancialScoreDisplayProps> = ({
             className="font-bold text-gray-800"
             style={{ fontSize: '8rem', lineHeight: '1' }}
           >
-            {score}
+            {Math.round(score)}
           </span>
           <div className="flex flex-col items-center space-x-1">
             <span className="text-3xl font-semibold text-purple-600">
