@@ -6,14 +6,23 @@ export interface IUser {
   picturePath: string | null;
 }
 
+// Minimal financial-focused event model used by the calendar UI.
 export interface IEvent {
-  id: number;
-  startDate: string;
-  endDate: string;
+  id: number; // keep number to match existing components
+  startDate: string; // ISO string
+  endDate: string; // ISO string
   title: string;
   color: TEventColor;
-  description: string;
+  description?: string;
   user: IUser;
+
+  // Financial extensions
+  kind?: 'bill' | 'payday' | 'subscription' | 'transfer' | 'reminder' | 'other';
+  amount?: number; // positive for inflows, negative for outflows
+  accountId?: string; // identifier for related account (optional)
+  paidDates?: string[]; // ISO dates of occurrences that were marked paid
+  allDay?: boolean;
+  recurrence?: string | null; // optional recurrence rule or description
 }
 
 export interface ICalendarCell {
